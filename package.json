@@ -1,0 +1,25 @@
+{
+  "name": "Babodabot",
+  "version": "1.0.0",
+  "description": "A twitter bot that babodabobadabadoobabo",
+  "main": "babodabot.js",
+  "dependencies": {
+    "twit": "^2.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node babodabot.js",
+    "test": "node babodabot.js"
+  },
+  "repository": {
+    "type": "",
+    "url": ""
+  },
+  "keywords": [
+    "twitter",
+    "bot",
+    "knutaf"
+  ],
+  "author": "knutaf",
+  "homepage": "http://barncover.blogspot.com/"
+}
