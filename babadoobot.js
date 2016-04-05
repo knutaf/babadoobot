@@ -14,6 +14,7 @@ function Transition(text, nextState, weight)
 var StateInitial = new BoboState("initial");
 var StateInitialB = new BoboState("^b");
 var StateB = new BoboState("b");
+var StateSingleB = new BoboState("<b>");
 var StateBB = new BoboState("bb");
 var StateA = new BoboState("a");
 var StateAA = new BoboState("aa");
@@ -22,6 +23,9 @@ var StateD = new BoboState("d");
 var StateDD = new BoboState("dd");
 var StateO = new BoboState("o");
 var StateOO = new BoboState("oo");
+
+var StatePenultimateB = new BoboState("b.$");
+var StatePenultimateD = new BoboState("d.$");
 
 StateInitial.transitions.push(new Transition("b", StateInitialB, 100));
 StateInitial.transitions.push(new Transition("a", StateA, 100));
@@ -35,6 +39,9 @@ StateB.transitions.push(new Transition("b", StateBB, 100));
 StateB.transitions.push(new Transition("a", StateA, 100));
 StateB.transitions.push(new Transition("d", StateSingleD, 100));
 StateB.transitions.push(new Transition("o", StateO, 100));
+
+StateSingleB.transitions.push(new Transition("a", StateA, 100));
+StateSingleB.transitions.push(new Transition("o", StateO, 100));
 
 StateBB.transitions.push(new Transition("a", StateA, 100));
 StateBB.transitions.push(new Transition("o", StateO, 100));
@@ -60,16 +67,43 @@ StateO.transitions.push(new Transition("b", StateB, 100));
 StateO.transitions.push(new Transition("d", StateD, 100));
 StateO.transitions.push(new Transition("o", StateOO, 100));
 
-StateOO.transitions.push(new Transition("b", StateB, 100));
-StateOO.transitions.push(new Transition("d", StateD, 100));
+StateOO.transitions.push(new Transition("b", StateSingleB, 100));
+StateOO.transitions.push(new Transition("d", StateSingleD, 100));
 
-function GenerateText(rand)
+StatePenultimateB.transitions.push(new Transition("a", StateA, 100));
+StatePenultimateB.transitions.push(new Transition("o", StateO, 100));
+
+StatePenultimateD.transitions.push(new Transition("a", StateA, 100));
+StatePenultimateD.transitions.push(new Transition("o", StateO, 100));
+
+function GenerateWord(rand, wordLength)
 {
     var state = StateInitial;
     var text = "";
 
-    for (var i = 0; i < 10; i++)
+    for (var i = 0; i < wordLength; i++)
     {
+        // if at last letter
+        if (i == wordLength-1)
+        {
+            switch (state)
+            {
+                case StateB:
+                {
+                    console.log("Switching from StateB -> StatePenultimateB");
+                    state = StatePenultimateB;
+                    break;
+                }
+
+                case StateD:
+                {
+                    console.log("Switching from StateD -> StatePenultimateD");
+                    state = StatePenultimateD;
+                    break;
+                }
+            }
+        }
+
         var whichTransition = rand.range(state.transitions.length);
         console.log("picking transition " + whichTransition + " from state " + state.name);
 
@@ -94,7 +128,7 @@ function Main(args)
     var rand = gen.create(seed);
 
     //var Twit = require('twit');
-    var text = GenerateText(rand);
+    var text = GenerateWord(rand, 10);
     console.log("text: " + text);
 }
 
