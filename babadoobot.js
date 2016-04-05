@@ -78,6 +78,8 @@ StatePenultimateD.transitions.push(new Transition("o", StateO, 100));
 
 function GenerateWord(rand, wordLength)
 {
+    console.log("GenerateWord(" + wordLength + ")");
+
     var state = StateInitial;
     var text = "";
 
@@ -127,8 +129,36 @@ function Main(args)
     var gen = require("random-seed");
     var rand = gen.create(seed);
 
-    //var Twit = require('twit');
-    var text = GenerateWord(rand, 10);
+    var MIN_CHARS = 2;
+    var MAX_CHARS = 70;
+    var MIN_WORD_LENGTH = 1;
+    var MAX_WORD_LENGTH = 10;
+
+    var numChars = rand.intBetween(MIN_CHARS, MAX_CHARS);
+    console.log("Minimum " + numChars + " chars");
+
+    var totalLength = 0;
+    var wordLengths = [];
+    while (totalLength < numChars)
+    {
+        var len = rand.intBetween(MIN_WORD_LENGTH, MAX_WORD_LENGTH);
+        totalLength += len;
+        wordLengths.push(len);
+    }
+
+    console.log("Generating " + wordLengths.length + " words, total " + totalLength + " chars");
+
+    var text = "";
+    for (var i = 0; i < wordLengths.length; i++)
+    {
+        if (i > 0)
+        {
+            text += " ";
+        }
+
+        text += GenerateWord(rand, wordLengths[i]);
+    }
+
     console.log("text: " + text);
 }
 
