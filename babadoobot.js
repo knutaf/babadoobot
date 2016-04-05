@@ -63,14 +63,14 @@ StateO.transitions.push(new Transition("o", StateOO, 100));
 StateOO.transitions.push(new Transition("b", StateB, 100));
 StateOO.transitions.push(new Transition("d", StateD, 100));
 
-function GenerateText()
+function GenerateText(rand)
 {
     var state = StateInitial;
     var text = "";
 
     for (var i = 0; i < 10; i++)
     {
-        var whichTransition = Math.floor(Math.random() * state.transitions.length);
+        var whichTransition = rand.range(state.transitions.length);
         console.log("picking transition " + whichTransition + " from state " + state.name);
 
         var transition = state.transitions[whichTransition];
@@ -81,11 +81,21 @@ function GenerateText()
     return text;
 }
 
-function Main()
+function Main(args)
 {
+    var seed = "" + Math.random();
+    if (args.length > 2)
+    {
+        seed = args[2];
+    }
+
+    console.log("Seeding with " + seed);
+    var gen = require("random-seed");
+    var rand = gen.create(seed);
+
     //var Twit = require('twit');
-    var text = GenerateText();
+    var text = GenerateText(rand);
     console.log("text: " + text);
 }
 
-Main();
+Main(process.argv);
