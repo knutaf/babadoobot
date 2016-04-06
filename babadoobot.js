@@ -158,10 +158,33 @@ function GenerateWord(rand, wordLength)
 
 function Main(args)
 {
+    var testingMode = false;
     var seed = "" + Math.random();
-    if (args.length > 2)
+
+    for (var iArg = 2; iArg < args.length; iArg++)
     {
-        seed = args[2];
+        switch (args[iArg])
+        {
+            case "-seed":
+            {
+                iArg++;
+                if (iArg < args.length)
+                {
+                    seed = args[iArg];
+                }
+                else
+                {
+                    throw "arg -seed needs argument!";
+                }
+                break;
+            }
+
+            case "-test":
+            {
+                testingMode = true;
+                break;
+            }
+        }
     }
 
     console.log("Seeding with " + seed);
@@ -173,12 +196,13 @@ function Main(args)
     var MIN_WORD_LENGTH = 1;
     var MAX_WORD_LENGTH = 10;
 
-    /*
-    var MIN_CHARS = 10;
-    var MAX_CHARS = 10;
-    var MIN_WORD_LENGTH = 10;
-    var MAX_WORD_LENGTH = 10;
-    */
+    if (testingMode)
+    {
+        MIN_CHARS = 10;
+        MAX_CHARS = 10;
+        MIN_WORD_LENGTH = 10;
+        MAX_WORD_LENGTH = 10;
+    }
 
     var numChars = rand.intBetween(MIN_CHARS, MAX_CHARS);
     console.log("Minimum " + numChars + " chars");
