@@ -35,7 +35,7 @@ StateInitial.transitions.push(new Transition("o", StateO, 100));
 StateInitialB.transitions.push(new Transition("a", StateA, 100));
 StateInitialB.transitions.push(new Transition("o", StateO, 100));
 
-StateB.transitions.push(new Transition("b", StateBB, 100));
+StateB.transitions.push(new Transition("b", StateBB, 50));
 StateB.transitions.push(new Transition("a", StateA, 100));
 StateB.transitions.push(new Transition("d", StateSingleD, 100));
 StateB.transitions.push(new Transition("o", StateO, 100));
@@ -47,7 +47,7 @@ StateBB.transitions.push(new Transition("a", StateA, 100));
 StateBB.transitions.push(new Transition("o", StateO, 100));
 
 StateA.transitions.push(new Transition("b", StateB, 100));
-StateA.transitions.push(new Transition("a", StateAA, 100));
+StateA.transitions.push(new Transition("a", StateAA, 25));
 StateA.transitions.push(new Transition("d", StateD, 100));
 
 StateAA.transitions.push(new Transition("b", StateB, 100));
@@ -57,7 +57,7 @@ StateSingleD.transitions.push(new Transition("a", StateA, 100));
 StateSingleD.transitions.push(new Transition("o", StateO, 100));
 
 StateD.transitions.push(new Transition("a", StateA, 100));
-StateD.transitions.push(new Transition("d", StateDD, 100));
+StateD.transitions.push(new Transition("d", StateDD, 50));
 StateD.transitions.push(new Transition("o", StateO, 100));
 
 StateDD.transitions.push(new Transition("a", StateA, 100));
@@ -65,7 +65,7 @@ StateDD.transitions.push(new Transition("o", StateO, 100));
 
 StateO.transitions.push(new Transition("b", StateB, 100));
 StateO.transitions.push(new Transition("d", StateD, 100));
-StateO.transitions.push(new Transition("o", StateOO, 100));
+StateO.transitions.push(new Transition("o", StateOO, 70));
 
 StateOO.transitions.push(new Transition("b", StateSingleB, 100));
 StateOO.transitions.push(new Transition("d", StateSingleD, 100));
@@ -85,7 +85,8 @@ function GenerateWord(rand, wordLength)
 
     for (var i = 0; i < wordLength; i++)
     {
-        // if at last letter
+        // if at last letter, a few different states are used, to prevent the
+        // word from sounding weird at the end
         if (i == wordLength-1)
         {
             switch (state)
@@ -106,10 +107,30 @@ function GenerateWord(rand, wordLength)
             }
         }
 
-        var whichTransition = rand.range(state.transitions.length);
-        console.log("picking transition " + whichTransition + " from state " + state.name);
+        var totalTransitionWeight = 0;
+        for (var j = 0; j < state.transitions.length; j++)
+        {
+            totalTransitionWeight += state.transitions[j].weight;
+        }
 
-        var transition = state.transitions[whichTransition];
+        var transitionWeightBucket = rand.intBetween(1, totalTransitionWeight);
+        console.log("totalTransitionWeight = " + totalTransitionWeight + ", transitionWeightBucket = " + transitionWeightBucket);
+        var chosenTransition = 0;
+        var weight = state.transitions[chosenTransition].weight;
+        while (weight < transitionWeightBucket)
+        {
+            chosenTransition++;
+            weight += state.transitions[chosenTransition].weight;
+        }
+
+        console.log("picking transition " + chosenTransition + " from state " + state.name);
+
+        if (chosenTransition >= state.transitions.length)
+        {
+            throw "invalid transition! " + chosenTransition;
+        }
+
+        var transition = state.transitions[chosenTransition];
         text += transition.text;
         state = transition.nextState;
     }
@@ -129,9 +150,16 @@ function Main(args)
     var gen = require("random-seed");
     var rand = gen.create(seed);
 
+    /*
     var MIN_CHARS = 2;
     var MAX_CHARS = 70;
     var MIN_WORD_LENGTH = 1;
+    var MAX_WORD_LENGTH = 10;
+    */
+
+    var MIN_CHARS = 10;
+    var MAX_CHARS = 10;
+    var MIN_WORD_LENGTH = 10;
     var MAX_WORD_LENGTH = 10;
 
     var numChars = rand.intBetween(MIN_CHARS, MAX_CHARS);
