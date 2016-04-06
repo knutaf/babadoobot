@@ -1,3 +1,8 @@
+function FilterNonNull(elem)
+{
+    return (elem != null);
+}
+
 function BoboState(name)
 {
     this.name = name;
@@ -156,6 +161,172 @@ function GenerateWord(rand, wordLength)
     return text;
 }
 
+var ME_TEXT =
+[
+    " (that's me!)"
+    ," (who, me?)"
+    ," (hi!)"
+    ," (it's me!)"
+    ," (yooo)"
+    ," B)"
+];
+
+var SHEEP_TEXT =
+[
+    " (a sheep!)"
+    ," (suddenly, a sheep!)"
+    ," (turned into a sheep)"
+];
+
+var DELICIOUS_TEXT =
+[
+    " (mmm)"
+    ," (delicious!)"
+    ," (so good)"
+    ," (i'm hungry)"
+    ," (nom nom)"
+];
+
+var BOO_TEXT =
+[
+    "!"
+    ," (a ghost!)"
+    ," (spooky)"
+    ,"hoo"
+];
+
+var HURT_TEXT =
+[
+    " (you ok?)"
+    ," (medic!)"
+    ," (need a doctor)"
+    ," (it hooths)"
+];
+
+function ProcessWords(rand, words, maxNumChars)
+{
+    var modifiedWords = [];
+    for (var i = 0; i < words.length; i++)
+    {
+        var word = words[i];
+        modifiedWords[i] = true;
+        switch (words[i])
+        {
+            case "boo":
+            {
+                if (rand.range(2))
+                {
+                    words[i] += BOO_TEXT[rand.range(BOO_TEXT.length)];
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            case "booboo":
+            {
+                if (rand.range(2))
+                {
+                    words[i] += HURT_TEXT[rand.range(HURT_TEXT.length)];
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            case "obobobo":
+            {
+                if (rand.range(2))
+                {
+                    words[i] = "@/OboboboTheNinja";
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            case "babadoo":
+            case "babadoobo":
+            {
+                if (rand.range(2))
+                {
+                    words[i] += ME_TEXT[rand.range(ME_TEXT.length)];
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            case "baa":
+            case "baabaa":
+            {
+                if (rand.range(2))
+                {
+                    words[i] += SHEEP_TEXT[rand.range(SHEEP_TEXT.length)];
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            case "adobada":
+            case "adobo":
+            {
+                if (rand.range(2))
+                {
+                    words[i] += " " + DELICIOUS_TEXT[rand.range(DELICIOUS_TEXT.length)];
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            default:
+            {
+                modifiedWords[i] = false;
+            }
+        }
+
+        if (modifiedWords[i])
+        {
+            console.log("modified " + word + " (" + i + "): " + words[i]);
+        }
+    }
+
+    var allWords = words.join(" ");
+    while (allWords.length > maxNumChars)
+    {
+        console.log("words [" + allWords + "] is too long, " + allWords.length + " vs " + maxNumChars);
+
+        var validWordToDelete = false;
+        var indexToDelete = rand.range(words.length);
+        while (modifiedWords[indexToDelete])
+        {
+            indexToDelete = rand.range(words.length);
+        }
+
+        console.log("deleting word " + indexToDelete + " -- " + words[indexToDelete]);
+
+        words[indexToDelete] = null;
+        words = words.filter(FilterNonNull);
+        allWords = words.join(" ");
+    }
+
+    return words;
+}
+
 function Main(args)
 {
     var testingMode = false;
@@ -198,10 +369,17 @@ function Main(args)
 
     if (testingMode)
     {
+        /*
         MIN_CHARS = 10;
         MAX_CHARS = 10;
         MIN_WORD_LENGTH = 10;
         MAX_WORD_LENGTH = 10;
+        */
+
+        MIN_CHARS = 80;
+        MAX_CHARS = 90;
+        MIN_WORD_LENGTH = 1;
+        MAX_WORD_LENGTH = 4;
     }
 
     var numChars = rand.intBetween(MIN_CHARS, MAX_CHARS);
@@ -218,18 +396,25 @@ function Main(args)
 
     console.log("Generating " + wordLengths.length + " words, total " + totalLength + " chars");
 
-    var text = "";
+    var words = [];
     for (var i = 0; i < wordLengths.length; i++)
     {
-        if (i > 0)
-        {
-            text += " ";
-        }
-
-        text += GenerateWord(rand, wordLengths[i]);
+        words.push(GenerateWord(rand, wordLengths[i]));
     }
 
-    console.log("text: " + text);
+    if (testingMode)
+    {
+        if (words.length > 5)
+        {
+           words[2] = "baa";
+           words[5] = "obobobo";
+        }
+    }
+
+    words = ProcessWords(rand, words, 140);
+
+    var text = words.join(" ");
+    console.log("text (len=" + text.length + "): " + text);
 }
 
 Main(process.argv);
