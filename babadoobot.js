@@ -11,7 +11,8 @@ function Transition(text, nextState, weight)
     this.weight = weight;
 }
 
-var StateInitial = new BoboState("initial");
+var StateInitial = new BoboState("i");
+var StateInitialSingle = new BoboState("<i>");
 var StateInitialB = new BoboState("^b");
 var StateB = new BoboState("b");
 var StateSingleB = new BoboState("<b>");
@@ -31,6 +32,9 @@ StateInitial.transitions.push(new Transition("b", StateInitialB, 100));
 StateInitial.transitions.push(new Transition("a", StateA, 100));
 StateInitial.transitions.push(new Transition("d", StateSingleD, 100));
 StateInitial.transitions.push(new Transition("o", StateO, 100));
+
+StateInitialSingle.transitions.push(new Transition("a", StateA, 100));
+StateInitialSingle.transitions.push(new Transition("o", StateO, 100));
 
 StateInitialB.transitions.push(new Transition("a", StateA, 100));
 StateInitialB.transitions.push(new Transition("o", StateO, 100));
@@ -85,24 +89,38 @@ function GenerateWord(rand, wordLength)
 
     for (var i = 0; i < wordLength; i++)
     {
-        // if at last letter, a few different states are used, to prevent the
-        // word from sounding weird at the end
         if (i == wordLength-1)
         {
-            switch (state)
+            // If a single letter word, use a different initial state
+            if (i == 0)
             {
-                case StateB:
+                if (state != StateInitial)
                 {
-                    console.log("Switching from StateB -> StatePenultimateB");
-                    state = StatePenultimateB;
-                    break;
+                    throw "On single-letter word, somehow not at StateInitial! " + state.name;
                 }
 
-                case StateD:
+                state = StateInitialSingle;
+            }
+
+            // if at last letter, a few different states are used, to prevent
+            // the word from sounding weird at the end
+            else
+            {
+                switch (state)
                 {
-                    console.log("Switching from StateD -> StatePenultimateD");
-                    state = StatePenultimateD;
-                    break;
+                    case StateB:
+                    {
+                        console.log("Switching from StateB -> StatePenultimateB");
+                        state = StatePenultimateB;
+                        break;
+                    }
+
+                    case StateD:
+                    {
+                        console.log("Switching from StateD -> StatePenultimateD");
+                        state = StatePenultimateD;
+                        break;
+                    }
                 }
             }
         }
@@ -150,17 +168,17 @@ function Main(args)
     var gen = require("random-seed");
     var rand = gen.create(seed);
 
-    /*
     var MIN_CHARS = 2;
     var MAX_CHARS = 70;
     var MIN_WORD_LENGTH = 1;
     var MAX_WORD_LENGTH = 10;
-    */
 
+    /*
     var MIN_CHARS = 10;
     var MAX_CHARS = 10;
     var MIN_WORD_LENGTH = 10;
     var MAX_WORD_LENGTH = 10;
+    */
 
     var numChars = rand.intBetween(MIN_CHARS, MAX_CHARS);
     console.log("Minimum " + numChars + " chars");
