@@ -1,40 +1,42 @@
 'use strict';
 var gen = require("random-seed");
 
-function FilterNonNull(elem)
+function FilterNonNull(elem : any)
 {
     return (elem != null);
 }
 
-function BoboState(name)
-{
-    this.name = name;
-    this.transitions = [];
+class BState {
+    transitions : Transition[];
+
+    constructor(public name : string)
+    {
+        this.transitions = [];
+    }
 }
 
-function Transition(text, nextState, weight)
-{
-    this.text = text;
-    this.nextState = nextState;
-    this.weight = weight;
+class Transition {
+    constructor(public text : string, public nextState : BState, public weight : number)
+    {
+    }
 }
 
-var StateInitial = new BoboState("i");
-var StateInitialSingle = new BoboState("<i>");
-var StateInitialB = new BoboState("^b");
-var StateB = new BoboState("b");
-var StateSingleB = new BoboState("<b>");
-var StateBB = new BoboState("bb");
-var StateA = new BoboState("a");
-var StateAA = new BoboState("aa");
-var StateSingleD = new BoboState("<d>");
-var StateD = new BoboState("d");
-var StateDD = new BoboState("dd");
-var StateO = new BoboState("o");
-var StateOO = new BoboState("oo");
+let StateInitial = new BState("i");
+let StateInitialSingle = new BState("<i>");
+let StateInitialB = new BState("^b");
+let StateB = new BState("b");
+let StateSingleB = new BState("<b>");
+let StateBB = new BState("bb");
+let StateA = new BState("a");
+let StateAA = new BState("aa");
+let StateSingleD = new BState("<d>");
+let StateD = new BState("d");
+let StateDD = new BState("dd");
+let StateO = new BState("o");
+let StateOO = new BState("oo");
 
-var StatePenultimateB = new BoboState("b.$");
-var StatePenultimateD = new BoboState("d.$");
+let StatePenultimateB = new BState("b.$");
+let StatePenultimateD = new BState("d.$");
 
 StateInitial.transitions.push(new Transition("b", StateInitialB, 100));
 StateInitial.transitions.push(new Transition("a", StateA, 100));
