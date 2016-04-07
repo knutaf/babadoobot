@@ -1,5 +1,5 @@
 'use strict';
-var gen = require("random-seed");
+let randomSeed : any = require("random-seed");
 
 function FilterNonNull(elem : any)
 {
@@ -21,22 +21,22 @@ class Transition {
     }
 }
 
-let StateInitial = new BState("i");
-let StateInitialSingle = new BState("<i>");
-let StateInitialB = new BState("^b");
-let StateB = new BState("b");
-let StateSingleB = new BState("<b>");
-let StateBB = new BState("bb");
-let StateA = new BState("a");
-let StateAA = new BState("aa");
-let StateSingleD = new BState("<d>");
-let StateD = new BState("d");
-let StateDD = new BState("dd");
-let StateO = new BState("o");
-let StateOO = new BState("oo");
+let StateInitial : BState = new BState("i");
+let StateInitialSingle : BState = new BState("<i>");
+let StateInitialB : BState = new BState("^b");
+let StateB : BState = new BState("b");
+let StateSingleB : BState = new BState("<b>");
+let StateBB : BState = new BState("bb");
+let StateA : BState = new BState("a");
+let StateAA : BState = new BState("aa");
+let StateSingleD : BState = new BState("<d>");
+let StateD : BState = new BState("d");
+let StateDD : BState = new BState("dd");
+let StateO : BState = new BState("o");
+let StateOO : BState = new BState("oo");
 
-let StatePenultimateB = new BState("b.$");
-let StatePenultimateD = new BState("d.$");
+let StatePenultimateB : BState = new BState("b.$");
+let StatePenultimateD : BState = new BState("d.$");
 
 StateInitial.transitions.push(new Transition("b", StateInitialB, 100));
 StateInitial.transitions.push(new Transition("a", StateA, 100));
@@ -90,14 +90,14 @@ StatePenultimateB.transitions.push(new Transition("o", StateO, 100));
 StatePenultimateD.transitions.push(new Transition("a", StateA, 100));
 StatePenultimateD.transitions.push(new Transition("o", StateO, 100));
 
-function GenerateWord(rand, wordLength)
+function GenerateWord(rand : any, wordLength : number)
 {
     console.log("GenerateWord(" + wordLength + ")");
 
-    var state = StateInitial;
-    var text = "";
+    let state : BState = StateInitial;
+    let text : string = "";
 
-    for (var i = 0; i < wordLength; i++)
+    for (let i : number = 0; i < wordLength; i++)
     {
         if (i == wordLength-1)
         {
@@ -135,16 +135,16 @@ function GenerateWord(rand, wordLength)
             }
         }
 
-        var totalTransitionWeight = 0;
-        for (var j = 0; j < state.transitions.length; j++)
+        let totalTransitionWeight : number = 0;
+        for (let j : number = 0; j < state.transitions.length; j++)
         {
             totalTransitionWeight += state.transitions[j].weight;
         }
 
-        var transitionWeightBucket = rand.intBetween(1, totalTransitionWeight);
+        let transitionWeightBucket : number = rand.intBetween(1, totalTransitionWeight);
         console.log("totalTransitionWeight = " + totalTransitionWeight + ", transitionWeightBucket = " + transitionWeightBucket);
-        var chosenTransition = 0;
-        var weight = state.transitions[chosenTransition].weight;
+        let chosenTransition : number = 0;
+        let weight : number = state.transitions[chosenTransition].weight;
         while (weight < transitionWeightBucket)
         {
             chosenTransition++;
@@ -158,7 +158,7 @@ function GenerateWord(rand, wordLength)
             throw "invalid transition! " + chosenTransition;
         }
 
-        var transition = state.transitions[chosenTransition];
+        let transition : Transition = state.transitions[chosenTransition];
         text += transition.text;
         state = transition.nextState;
     }
@@ -166,7 +166,7 @@ function GenerateWord(rand, wordLength)
     return text;
 }
 
-var ME_TEXT =
+let ME_TEXT : string[] =
 [
     " (that's me!)"
     ," (who, me?)"
@@ -176,14 +176,14 @@ var ME_TEXT =
     ," B)"
 ];
 
-var SHEEP_TEXT =
+let SHEEP_TEXT : string[] =
 [
     " (a sheep!)"
     ," (suddenly, a sheep!)"
     ," (turned into a sheep)"
 ];
 
-var DELICIOUS_TEXT =
+let DELICIOUS_TEXT : string[] =
 [
     " (mmm)"
     ," (delicious!)"
@@ -192,7 +192,7 @@ var DELICIOUS_TEXT =
     ," (nom nom)"
 ];
 
-var BOO_TEXT =
+let BOO_TEXT : string[] =
 [
     "!"
     ," (a ghost!)"
@@ -200,7 +200,7 @@ var BOO_TEXT =
     ,"hoo"
 ];
 
-var HURT_TEXT =
+let HURT_TEXT : string[] =
 [
     " (you ok?)"
     ," (medic!)"
@@ -208,12 +208,12 @@ var HURT_TEXT =
     ," (it hooths)"
 ];
 
-function ProcessWords(rand, words, maxNumChars)
+function ProcessWords(rand : any, words : string[], maxNumChars : number)
 {
-    var modifiedWords = [];
-    for (var i = 0; i < words.length; i++)
+    let modifiedWords : boolean[] = [];
+    for (let i : number = 0; i < words.length; i++)
     {
-        var word = words[i];
+        let word : string = words[i];
         modifiedWords[i] = true;
         switch (words[i])
         {
@@ -310,13 +310,12 @@ function ProcessWords(rand, words, maxNumChars)
         }
     }
 
-    var allWords = words.join(" ");
+    let allWords : string = words.join(" ");
     while (allWords.length > maxNumChars)
     {
         console.log("words [" + allWords + "] is too long, " + allWords.length + " vs " + maxNumChars);
 
-        var validWordToDelete = false;
-        var indexToDelete = rand.range(words.length);
+        let indexToDelete : number = rand.range(words.length);
         while (modifiedWords[indexToDelete])
         {
             indexToDelete = rand.range(words.length);
@@ -332,12 +331,12 @@ function ProcessWords(rand, words, maxNumChars)
     return words;
 }
 
-function Main(args)
+function Main(args : string[])
 {
-    var testingMode = false;
-    var seed = "" + Math.random();
+    let testingMode : boolean = false;
+    let seed : string = "" + Math.random();
 
-    for (var iArg = 2; iArg < args.length; iArg++)
+    for (let iArg : number = 2; iArg < args.length; iArg++)
     {
         switch (args[iArg])
         {
@@ -364,12 +363,12 @@ function Main(args)
     }
 
     console.log("Seeding with " + seed);
-    var rand = gen.create(seed);
+    let rand : any = randomSeed.create(seed);
 
-    var MIN_CHARS = 2;
-    var MAX_CHARS = 140;
-    var MIN_WORD_LENGTH = 1;
-    var MAX_WORD_LENGTH = 10;
+    let MIN_CHARS : number = 2;
+    let MAX_CHARS : number = 140;
+    let MIN_WORD_LENGTH : number = 1;
+    let MAX_WORD_LENGTH : number = 10;
 
     if (testingMode)
     {
@@ -386,22 +385,22 @@ function Main(args)
         MAX_WORD_LENGTH = 4;
     }
 
-    var numChars = rand.intBetween(MIN_CHARS, MAX_CHARS);
+    let numChars : number = rand.intBetween(MIN_CHARS, MAX_CHARS);
     console.log("Minimum " + numChars + " chars");
 
-    var totalLength = 0;
-    var wordLengths = [];
+    let totalLength : number = 0;
+    let wordLengths : number[] = [];
     while (totalLength < numChars)
     {
-        var len = rand.intBetween(MIN_WORD_LENGTH, MAX_WORD_LENGTH);
+        let len : number = rand.intBetween(MIN_WORD_LENGTH, MAX_WORD_LENGTH);
         totalLength += len;
         wordLengths.push(len);
     }
 
     console.log("Generating " + wordLengths.length + " words, total " + totalLength + " chars");
 
-    var words = [];
-    for (var i = 0; i < wordLengths.length; i++)
+    let words : string[] = [];
+    for (let i : number = 0; i < wordLengths.length; i++)
     {
         words.push(GenerateWord(rand, wordLengths[i]));
     }
@@ -417,7 +416,7 @@ function Main(args)
 
     words = ProcessWords(rand, words, 140);
 
-    var text = words.join(" ");
+    let text : string = words.join(" ");
     console.log("text (len=" + text.length + "): " + text);
 }
 
