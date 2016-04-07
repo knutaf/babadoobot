@@ -1,3 +1,6 @@
+'use strict';
+var gen = require("random-seed");
+
 function FilterNonNull(elem)
 {
     return (elem != null);
@@ -359,11 +362,10 @@ function Main(args)
     }
 
     console.log("Seeding with " + seed);
-    var gen = require("random-seed");
     var rand = gen.create(seed);
 
     var MIN_CHARS = 2;
-    var MAX_CHARS = 70;
+    var MAX_CHARS = 140;
     var MIN_WORD_LENGTH = 1;
     var MAX_WORD_LENGTH = 10;
 
@@ -417,4 +419,4 @@ function Main(args)
     console.log("text (len=" + text.length + "): " + text);
 }
 
-Main(process.argv);
+Main(global.process.argv);
