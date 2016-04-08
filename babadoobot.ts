@@ -218,6 +218,39 @@ let HURT_TEXT : string[] =
     ," (it hooths)"
 ];
 
+let BOBA_TEXT : string[] =
+[
+    " (as in fett)"
+    ," (tea)"
+    ," (fett, of course)"
+    ," (nice jetpack)"
+];
+
+let DAD_TEXT : string[] =
+[
+    " (yes, son?)"
+    ," (praise the son)"
+    ," (bless you, my child)"
+];
+
+let DODO_TEXT : string[] =
+[
+    " (extinct)"
+    ," (poor bird)"
+    ," (the bird, long gone)"
+];
+
+let BAD_TEXT : string[] =
+[
+    "dger"
+    ,"minton"
+];
+
+let BADA_TEXT : string[] =
+[
+    "bing"
+];
+
 function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : number)
 {
     let modifiedWords : boolean[] = [];
@@ -227,6 +260,87 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
         modifiedWords[i] = true;
         switch (words[i])
         {
+            case "adobada":
+            case "adobo":
+            {
+                if (rand.bool())
+                {
+                    words[i] += RandomArrayElement(DELICIOUS_TEXT, rand);
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            case "baa":
+            case "baabaa":
+            {
+                if (rand.bool())
+                {
+                    words[i] += RandomArrayElement(SHEEP_TEXT, rand);
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            case "babadoo":
+            case "babadoobo":
+            {
+                if (rand.bool())
+                {
+                    words[i] += RandomArrayElement(ME_TEXT, rand);
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            case "bad":
+            {
+                if (rand.bool({likelihood: 20}))
+                {
+                    words[i] += RandomArrayElement(BAD_TEXT, rand);
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            case "bada":
+            {
+                if (rand.bool({likelihood: 20}))
+                {
+                    words[i] += RandomArrayElement(BADA_TEXT, rand);
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            case "boba":
+            {
+                if (rand.bool())
+                {
+                    words[i] += RandomArrayElement(BOBA_TEXT, rand);
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
             case "boo":
             {
                 if (rand.bool())
@@ -253,53 +367,38 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
                 break;
             }
 
+            case "dad":
+            case "dada":
+            {
+                if (rand.bool())
+                {
+                    words[i] += RandomArrayElement(DAD_TEXT, rand);
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            case "dodo":
+            {
+                if (rand.bool())
+                {
+                    words[i] += RandomArrayElement(DODO_TEXT, rand);
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
             case "obobobo":
             {
                 if (rand.bool())
                 {
                     words[i] = "@/OboboboTheNinja";
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
-                break;
-            }
-
-            case "babadoo":
-            case "babadoobo":
-            {
-                if (rand.bool())
-                {
-                    words[i] += RandomArrayElement(ME_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
-                break;
-            }
-
-            case "baa":
-            case "baabaa":
-            {
-                if (rand.bool())
-                {
-                    words[i] += RandomArrayElement(SHEEP_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
-                break;
-            }
-
-            case "adobada":
-            case "adobo":
-            {
-                if (rand.bool())
-                {
-                    words[i] += RandomArrayElement(DELICIOUS_TEXT, rand);
                 }
                 else
                 {
@@ -344,7 +443,7 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
 function Main(args : string[])
 {
     let testingMode : boolean = false;
-    let seed : number = Math.random();
+    let seed : number = Math.round(Math.random() * 1000000000);
 
     for (let iArg : number = 2; iArg < args.length; iArg++)
     {
@@ -372,7 +471,6 @@ function Main(args : string[])
         }
     }
 
-    console.log("Seeding with " + seed);
     let rand : Chance.Chance = new Chance(seed);
 
     let MIN_CHARS : number = 2;
@@ -427,6 +525,7 @@ function Main(args : string[])
     words = ProcessWords(rand, words, 140);
 
     let text : string = words.join(" ");
+    console.log("Seeded with " + seed);
     console.log("text (len=" + text.length + "): " + text);
 }
 
