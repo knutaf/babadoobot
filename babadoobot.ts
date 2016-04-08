@@ -1,9 +1,19 @@
 'use strict';
-let randomSeed : any = require("random-seed");
+import Chance = require("chance");
 
 function FilterNonNull(elem : any)
 {
     return (elem != null);
+}
+
+function RandomArrayIndex(arr : any[], rand : Chance.Chance)
+{
+    return rand.integer({min: 0, max: arr.length-1});
+}
+
+function RandomArrayElement(arr : any[], rand : Chance.Chance)
+{
+    return arr[RandomArrayIndex(arr, rand)];
 }
 
 class BState {
@@ -90,7 +100,7 @@ StatePenultimateB.transitions.push(new Transition("o", StateO, 100));
 StatePenultimateD.transitions.push(new Transition("a", StateA, 100));
 StatePenultimateD.transitions.push(new Transition("o", StateO, 100));
 
-function GenerateWord(rand : any, wordLength : number)
+function GenerateWord(rand : Chance.Chance, wordLength : number)
 {
     console.log("GenerateWord(" + wordLength + ")");
 
@@ -141,7 +151,7 @@ function GenerateWord(rand : any, wordLength : number)
             totalTransitionWeight += state.transitions[j].weight;
         }
 
-        let transitionWeightBucket : number = rand.intBetween(1, totalTransitionWeight);
+        let transitionWeightBucket : number = rand.integer({ min: 1, max: totalTransitionWeight});
         console.log("totalTransitionWeight = " + totalTransitionWeight + ", transitionWeightBucket = " + transitionWeightBucket);
         let chosenTransition : number = 0;
         let weight : number = state.transitions[chosenTransition].weight;
@@ -208,7 +218,7 @@ let HURT_TEXT : string[] =
     ," (it hooths)"
 ];
 
-function ProcessWords(rand : any, words : string[], maxNumChars : number)
+function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : number)
 {
     let modifiedWords : boolean[] = [];
     for (let i : number = 0; i < words.length; i++)
@@ -219,9 +229,9 @@ function ProcessWords(rand : any, words : string[], maxNumChars : number)
         {
             case "boo":
             {
-                if (rand.range(2))
+                if (rand.bool())
                 {
-                    words[i] += BOO_TEXT[rand.range(BOO_TEXT.length)];
+                    words[i] += RandomArrayElement(BOO_TEXT, rand);
                 }
                 else
                 {
@@ -232,9 +242,9 @@ function ProcessWords(rand : any, words : string[], maxNumChars : number)
 
             case "booboo":
             {
-                if (rand.range(2))
+                if (rand.bool())
                 {
-                    words[i] += HURT_TEXT[rand.range(HURT_TEXT.length)];
+                    words[i] += RandomArrayElement(HURT_TEXT, rand);
                 }
                 else
                 {
@@ -245,7 +255,7 @@ function ProcessWords(rand : any, words : string[], maxNumChars : number)
 
             case "obobobo":
             {
-                if (rand.range(2))
+                if (rand.bool())
                 {
                     words[i] = "@/OboboboTheNinja";
                 }
@@ -259,9 +269,9 @@ function ProcessWords(rand : any, words : string[], maxNumChars : number)
             case "babadoo":
             case "babadoobo":
             {
-                if (rand.range(2))
+                if (rand.bool())
                 {
-                    words[i] += ME_TEXT[rand.range(ME_TEXT.length)];
+                    words[i] += RandomArrayElement(ME_TEXT, rand);
                 }
                 else
                 {
@@ -273,9 +283,9 @@ function ProcessWords(rand : any, words : string[], maxNumChars : number)
             case "baa":
             case "baabaa":
             {
-                if (rand.range(2))
+                if (rand.bool())
                 {
-                    words[i] += SHEEP_TEXT[rand.range(SHEEP_TEXT.length)];
+                    words[i] += RandomArrayElement(SHEEP_TEXT, rand);
                 }
                 else
                 {
@@ -287,9 +297,9 @@ function ProcessWords(rand : any, words : string[], maxNumChars : number)
             case "adobada":
             case "adobo":
             {
-                if (rand.range(2))
+                if (rand.bool())
                 {
-                    words[i] += " " + DELICIOUS_TEXT[rand.range(DELICIOUS_TEXT.length)];
+                    words[i] += RandomArrayElement(DELICIOUS_TEXT, rand);
                 }
                 else
                 {
@@ -315,10 +325,10 @@ function ProcessWords(rand : any, words : string[], maxNumChars : number)
     {
         console.log("words [" + allWords + "] is too long, " + allWords.length + " vs " + maxNumChars);
 
-        let indexToDelete : number = rand.range(words.length);
+        let indexToDelete : number = RandomArrayIndex(words, rand);
         while (modifiedWords[indexToDelete])
         {
-            indexToDelete = rand.range(words.length);
+            indexToDelete = RandomArrayIndex(words, rand);
         }
 
         console.log("deleting word " + indexToDelete + " -- " + words[indexToDelete]);
@@ -334,7 +344,7 @@ function ProcessWords(rand : any, words : string[], maxNumChars : number)
 function Main(args : string[])
 {
     let testingMode : boolean = false;
-    let seed : string = "" + Math.random();
+    let seed : number = Math.random();
 
     for (let iArg : number = 2; iArg < args.length; iArg++)
     {
@@ -345,7 +355,7 @@ function Main(args : string[])
                 iArg++;
                 if (iArg < args.length)
                 {
-                    seed = args[iArg];
+                    seed = parseInt(args[iArg]);
                 }
                 else
                 {
@@ -363,7 +373,7 @@ function Main(args : string[])
     }
 
     console.log("Seeding with " + seed);
-    let rand : any = randomSeed.create(seed);
+    let rand : Chance.Chance = new Chance(seed);
 
     let MIN_CHARS : number = 2;
     let MAX_CHARS : number = 140;
@@ -385,16 +395,16 @@ function Main(args : string[])
         MAX_WORD_LENGTH = 4;
     }
 
-    let numChars : number = rand.intBetween(MIN_CHARS, MAX_CHARS);
+    let numChars : number = rand.integer({min: MIN_CHARS, max: MAX_CHARS});
     console.log("Minimum " + numChars + " chars");
 
     let totalLength : number = 0;
     let wordLengths : number[] = [];
     while (totalLength < numChars)
     {
-        let len : number = rand.intBetween(MIN_WORD_LENGTH, MAX_WORD_LENGTH);
-        totalLength += len;
-        wordLengths.push(len);
+        let wordLength : number = rand.integer({min: MIN_WORD_LENGTH, max: MAX_WORD_LENGTH});
+        totalLength += wordLength;
+        wordLengths.push(wordLength);
     }
 
     console.log("Generating " + wordLengths.length + " words, total " + totalLength + " chars");
