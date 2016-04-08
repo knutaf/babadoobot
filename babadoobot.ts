@@ -1,6 +1,8 @@
 'use strict';
 import Chance = require("chance");
 import fs = require("fs");
+import sprintf_js = require("sprintf-js");
+
 let g_log : fs.WriteStream = null;
 let g_testingMode : boolean = false;
 
@@ -10,7 +12,7 @@ function log(text : string)
 
     if (g_log != null)
     {
-        g_log.write(text);
+        g_log.write(text + "\r\n");
     }
 }
 
@@ -488,6 +490,13 @@ function Main(args : string[])
 
 function Round(roundNum : number, seed : number)
 {
+    if (g_log != null)
+    {
+        g_log.end();
+    }
+
+    g_log = fs.createWriteStream(sprintf_js.sprintf("round_%04u.log", roundNum));
+
     const rand : Chance.Chance = new Chance(seed);
 
     let MIN_CHARS : number = 2;

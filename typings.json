@@ -1,6 +1,7 @@
 {
   "ambientDependencies": {
     "chance": "registry:dt/chance#0.7.3+20160317120654",
-    "node": "registry:dt/node#4.0.0+20160330064709"
+    "node": "registry:dt/node#4.0.0+20160330064709",
+    "sprintf-js": "registry:dt/sprintf-js#0.0.0+20160317120654"
   }
 }
