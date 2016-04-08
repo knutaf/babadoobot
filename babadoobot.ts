@@ -44,22 +44,22 @@ class Transition {
     }
 }
 
-let StateInitial : BState = new BState("i");
-let StateInitialSingle : BState = new BState("<i>");
-let StateInitialB : BState = new BState("^b");
-let StateB : BState = new BState("b");
-let StateSingleB : BState = new BState("<b>");
-let StateBB : BState = new BState("bb");
-let StateA : BState = new BState("a");
-let StateAA : BState = new BState("aa");
-let StateSingleD : BState = new BState("<d>");
-let StateD : BState = new BState("d");
-let StateDD : BState = new BState("dd");
-let StateO : BState = new BState("o");
-let StateOO : BState = new BState("oo");
+const StateInitial : BState = new BState("i");
+const StateInitialSingle : BState = new BState("<i>");
+const StateInitialB : BState = new BState("^b");
+const StateB : BState = new BState("b");
+const StateSingleB : BState = new BState("<b>");
+const StateBB : BState = new BState("bb");
+const StateA : BState = new BState("a");
+const StateAA : BState = new BState("aa");
+const StateSingleD : BState = new BState("<d>");
+const StateD : BState = new BState("d");
+const StateDD : BState = new BState("dd");
+const StateO : BState = new BState("o");
+const StateOO : BState = new BState("oo");
 
-let StatePenultimateB : BState = new BState("b.$");
-let StatePenultimateD : BState = new BState("d.$");
+const StatePenultimateB : BState = new BState("b.$");
+const StatePenultimateD : BState = new BState("d.$");
 
 StateInitial.transitions.push(new Transition("b", StateInitialB, 100));
 StateInitial.transitions.push(new Transition("a", StateA, 100));
@@ -164,7 +164,7 @@ function GenerateWord(rand : Chance.Chance, wordLength : number)
             totalTransitionWeight += state.transitions[j].weight;
         }
 
-        let transitionWeightBucket : number = rand.integer({ min: 1, max: totalTransitionWeight});
+        const transitionWeightBucket : number = rand.integer({ min: 1, max: totalTransitionWeight});
         log("totalTransitionWeight = " + totalTransitionWeight + ", transitionWeightBucket = " + transitionWeightBucket);
         let chosenTransition : number = 0;
         let weight : number = state.transitions[chosenTransition].weight;
@@ -181,7 +181,7 @@ function GenerateWord(rand : Chance.Chance, wordLength : number)
             throw "invalid transition! " + chosenTransition;
         }
 
-        let transition : Transition = state.transitions[chosenTransition];
+        const transition : Transition = state.transitions[chosenTransition];
         text += transition.text;
         state = transition.nextState;
     }
@@ -189,7 +189,7 @@ function GenerateWord(rand : Chance.Chance, wordLength : number)
     return text;
 }
 
-let ME_TEXT : string[] =
+const ME_TEXT : string[] =
 [
     " (that's me!)"
     ," (who, me?)"
@@ -199,14 +199,14 @@ let ME_TEXT : string[] =
     ," B)"
 ];
 
-let SHEEP_TEXT : string[] =
+const SHEEP_TEXT : string[] =
 [
     " (a sheep!)"
     ," (suddenly, a sheep!)"
     ," (turned into a sheep)"
 ];
 
-let DELICIOUS_TEXT : string[] =
+const DELICIOUS_TEXT : string[] =
 [
     " (mmm)"
     ," (delicious!)"
@@ -215,7 +215,7 @@ let DELICIOUS_TEXT : string[] =
     ," (nom nom)"
 ];
 
-let BOO_TEXT : string[] =
+const BOO_TEXT : string[] =
 [
     "!"
     ," (a ghost!)"
@@ -223,7 +223,7 @@ let BOO_TEXT : string[] =
     ,"hoo"
 ];
 
-let HURT_TEXT : string[] =
+const HURT_TEXT : string[] =
 [
     " (you ok?)"
     ," (medic!)"
@@ -231,7 +231,7 @@ let HURT_TEXT : string[] =
     ," (it hooths)"
 ];
 
-let BOBA_TEXT : string[] =
+const BOBA_TEXT : string[] =
 [
     " (as in fett)"
     ," (tea)"
@@ -239,27 +239,27 @@ let BOBA_TEXT : string[] =
     ," (nice jetpack)"
 ];
 
-let DAD_TEXT : string[] =
+const DAD_TEXT : string[] =
 [
     " (yes, son?)"
     ," (praise the son)"
     ," (bless you, my child)"
 ];
 
-let DODO_TEXT : string[] =
+const DODO_TEXT : string[] =
 [
     " (extinct)"
     ," (poor bird)"
     ," (the bird, long gone)"
 ];
 
-let BAD_TEXT : string[] =
+const BAD_TEXT : string[] =
 [
     "dger"
     ,"minton"
 ];
 
-let BADA_TEXT : string[] =
+const BADA_TEXT : string[] =
 [
     "bing"
 ];
@@ -488,7 +488,7 @@ function Main(args : string[])
 
 function Round(roundNum : number, seed : number)
 {
-    let rand : Chance.Chance = new Chance(seed);
+    const rand : Chance.Chance = new Chance(seed);
 
     let MIN_CHARS : number = 2;
     let MAX_CHARS : number = 140;
@@ -510,14 +510,14 @@ function Round(roundNum : number, seed : number)
         MAX_WORD_LENGTH = 4;
     }
 
-    let numChars : number = rand.integer({min: MIN_CHARS, max: MAX_CHARS});
+    const numChars : number = rand.integer({min: MIN_CHARS, max: MAX_CHARS});
     log("Minimum " + numChars + " chars");
 
     let totalLength : number = 0;
     let wordLengths : number[] = [];
     while (totalLength < numChars)
     {
-        let wordLength : number = rand.integer({min: MIN_WORD_LENGTH, max: MAX_WORD_LENGTH});
+        const wordLength : number = rand.integer({min: MIN_WORD_LENGTH, max: MAX_WORD_LENGTH});
         totalLength += wordLength;
         wordLengths.push(wordLength);
     }
@@ -541,7 +541,7 @@ function Round(roundNum : number, seed : number)
 
     words = ProcessWords(rand, words, 140);
 
-    let text : string = words.join(" ");
+    const text : string = words.join(" ");
     log("Seeded with " + seed);
     log("text (len=" + text.length + "): " + text);
 }
