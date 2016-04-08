@@ -6,13 +6,19 @@ import sprintf_js = require("sprintf-js");
 let g_log : fs.WriteStream = null;
 let g_testingMode : boolean = false;
 
-function log(text : string)
+function log(text : string, ...args: any[])
 {
-    console.log(text);
+    let message = text;
+    if (args != null)
+    {
+        message = sprintf_js.vsprintf(text, args);
+    }
+
+    console.log(message);
 
     if (g_log != null)
     {
-        g_log.write(text + "\r\n");
+        g_log.write(message + "\r\n");
     }
 }
 
@@ -552,7 +558,7 @@ function Round(roundNum : number, seed : number)
 
     const text : string = words.join(" ");
     log("Seeded with " + seed);
-    log("text (len=" + text.length + "): " + text);
+    log("#%04u (len=%u): %s", roundNum, text.length, text);
 }
 
 Main(global.process.argv);
