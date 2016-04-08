@@ -1,5 +1,18 @@
 'use strict';
 import Chance = require("chance");
+import fs = require("fs");
+let g_log : fs.WriteStream = null;
+let g_testingMode : boolean = false;
+
+function log(text : string)
+{
+    console.log(text);
+
+    if (g_log != null)
+    {
+        g_log.write(text);
+    }
+}
 
 function FilterNonNull(elem : any)
 {
@@ -102,7 +115,7 @@ StatePenultimateD.transitions.push(new Transition("o", StateO, 100));
 
 function GenerateWord(rand : Chance.Chance, wordLength : number)
 {
-    console.log("GenerateWord(" + wordLength + ")");
+    log("GenerateWord(" + wordLength + ")");
 
     let state : BState = StateInitial;
     let text : string = "";
@@ -130,14 +143,14 @@ function GenerateWord(rand : Chance.Chance, wordLength : number)
                 {
                     case StateB:
                     {
-                        console.log("Switching from StateB -> StatePenultimateB");
+                        log("Switching from StateB -> StatePenultimateB");
                         state = StatePenultimateB;
                         break;
                     }
 
                     case StateD:
                     {
-                        console.log("Switching from StateD -> StatePenultimateD");
+                        log("Switching from StateD -> StatePenultimateD");
                         state = StatePenultimateD;
                         break;
                     }
@@ -152,7 +165,7 @@ function GenerateWord(rand : Chance.Chance, wordLength : number)
         }
 
         let transitionWeightBucket : number = rand.integer({ min: 1, max: totalTransitionWeight});
-        console.log("totalTransitionWeight = " + totalTransitionWeight + ", transitionWeightBucket = " + transitionWeightBucket);
+        log("totalTransitionWeight = " + totalTransitionWeight + ", transitionWeightBucket = " + transitionWeightBucket);
         let chosenTransition : number = 0;
         let weight : number = state.transitions[chosenTransition].weight;
         while (weight < transitionWeightBucket)
@@ -161,7 +174,7 @@ function GenerateWord(rand : Chance.Chance, wordLength : number)
             weight += state.transitions[chosenTransition].weight;
         }
 
-        console.log("picking transition " + chosenTransition + " from state " + state.name);
+        log("picking transition " + chosenTransition + " from state " + state.name);
 
         if (chosenTransition >= state.transitions.length)
         {
@@ -415,14 +428,14 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
 
         if (modifiedWords[i])
         {
-            console.log("modified " + word + " (" + i + "): " + words[i]);
+            log("modified " + word + " (" + i + "): " + words[i]);
         }
     }
 
     let allWords : string = words.join(" ");
     while (allWords.length > maxNumChars)
     {
-        console.log("words [" + allWords + "] is too long, " + allWords.length + " vs " + maxNumChars);
+        log("words [" + allWords + "] is too long, " + allWords.length + " vs " + maxNumChars);
 
         let indexToDelete : number = RandomArrayIndex(words, rand);
         while (modifiedWords[indexToDelete])
@@ -430,7 +443,7 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
             indexToDelete = RandomArrayIndex(words, rand);
         }
 
-        console.log("deleting word " + indexToDelete + " -- " + words[indexToDelete]);
+        log("deleting word " + indexToDelete + " -- " + words[indexToDelete]);
 
         words[indexToDelete] = null;
         words = words.filter(FilterNonNull);
@@ -442,7 +455,6 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
 
 function Main(args : string[])
 {
-    let testingMode : boolean = false;
     let seed : number = Math.round(Math.random() * 1000000000);
 
     for (let iArg : number = 2; iArg < args.length; iArg++)
@@ -465,12 +477,17 @@ function Main(args : string[])
 
             case "-test":
             {
-                testingMode = true;
+                g_testingMode = true;
                 break;
             }
         }
     }
 
+    Round(1, seed);
+}
+
+function Round(roundNum : number, seed : number)
+{
     let rand : Chance.Chance = new Chance(seed);
 
     let MIN_CHARS : number = 2;
@@ -478,7 +495,7 @@ function Main(args : string[])
     let MIN_WORD_LENGTH : number = 1;
     let MAX_WORD_LENGTH : number = 10;
 
-    if (testingMode)
+    if (g_testingMode)
     {
         /*
         MIN_CHARS = 10;
@@ -494,7 +511,7 @@ function Main(args : string[])
     }
 
     let numChars : number = rand.integer({min: MIN_CHARS, max: MAX_CHARS});
-    console.log("Minimum " + numChars + " chars");
+    log("Minimum " + numChars + " chars");
 
     let totalLength : number = 0;
     let wordLengths : number[] = [];
@@ -505,7 +522,7 @@ function Main(args : string[])
         wordLengths.push(wordLength);
     }
 
-    console.log("Generating " + wordLengths.length + " words, total " + totalLength + " chars");
+    log("Generating " + wordLengths.length + " words, total " + totalLength + " chars");
 
     let words : string[] = [];
     for (let i : number = 0; i < wordLengths.length; i++)
@@ -513,7 +530,7 @@ function Main(args : string[])
         words.push(GenerateWord(rand, wordLengths[i]));
     }
 
-    if (testingMode)
+    if (g_testingMode)
     {
         if (words.length > 5)
         {
@@ -525,8 +542,8 @@ function Main(args : string[])
     words = ProcessWords(rand, words, 140);
 
     let text : string = words.join(" ");
-    console.log("Seeded with " + seed);
-    console.log("text (len=" + text.length + "): " + text);
+    log("Seeded with " + seed);
+    log("text (len=" + text.length + "): " + text);
 }
 
 Main(global.process.argv);
