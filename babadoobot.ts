@@ -464,7 +464,13 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
 
 function Main(args : string[])
 {
-    let seed : number = Math.round(Math.random() * 1000000000);
+    function ReSeed()
+    {
+        return Math.round(Math.random() * 1000000000);
+    }
+
+    let roundInterval = 5 * 1000;
+    let seed : number = ReSeed();
 
     for (let iArg : number = 2; iArg < args.length; iArg++)
     {
@@ -493,6 +499,11 @@ function Main(args : string[])
     }
 
     StartRound(seed);
+
+    setInterval(function() {
+        seed = ReSeed();
+        StartRound(seed);
+    }, roundInterval);
 }
 
 function StartRound(seed : number)
