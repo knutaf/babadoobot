@@ -260,6 +260,18 @@ const BADA_TEXT : string[] =
     "bing"
 ];
 
+const DOOD_TEXT : string[] =
+[
+    "!"
+    , " *squawk*"
+    , " <(\")"
+    , " <(^)"
+    , " (\")>"
+    , " (^)>"
+    , " <(*)"
+    , " (*)>"
+];
+
 function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : number) : string[]
 {
     let modifiedWords : boolean[] = [];
@@ -395,6 +407,19 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
                 if (rand.bool())
                 {
                     words[i] += RandomArrayElement(DODO_TEXT, rand);
+                }
+                else
+                {
+                    modifiedWords[i] = false;
+                }
+                break;
+            }
+
+            case "dood":
+            {
+                if (rand.bool())
+                {
+                    words[i] += RandomArrayElement(DOOD_TEXT, rand);
                 }
                 else
                 {
