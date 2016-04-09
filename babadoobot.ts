@@ -2,6 +2,7 @@
 import Chance = require("chance");
 import fs = require("fs");
 import sprintf_js = require("sprintf-js");
+import path = require("path");
 
 let g_log : fs.WriteStream = null;
 let g_testingMode : boolean = false;
@@ -491,7 +492,41 @@ function Main(args : string[])
         }
     }
 
-    Round(1, seed);
+    StartRound(seed);
+}
+
+function StartRound(seed : number)
+{
+    let scriptDir : string = path.dirname(global.process.argv[1]);
+    fs.readdir(scriptDir, function(err : Error, files : string[])
+    {
+        if (!err)
+        {
+            let lastRound : number = 0;
+            for (let i : number = 0; i < files.length; i++)
+            {
+                let matches : string[] = files[i].match(/^round_(\d+)\.log$/);
+                if (matches != null)
+                {
+                    log("found matching file " + files[i]);
+
+                    let roundNum : number = parseInt(matches[1]);
+                    log("found round number " + roundNum);
+                    if (roundNum > lastRound)
+                    {
+                        lastRound = roundNum;
+                        log("last seen round is " + lastRound);
+                    }
+                }
+            }
+
+            Round(lastRound + 1, seed);
+        }
+        else
+        {
+            log("error reading dir " + scriptDir + "! " + err);
+        }
+    });
 }
 
 function Round(roundNum : number, seed : number)
