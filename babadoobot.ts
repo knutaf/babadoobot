@@ -167,30 +167,7 @@ function GenerateWord(rand : Chance.Chance, wordLength : number) : string
             }
         }
 
-        let totalTransitionWeight : number = 0;
-        for (let j : number = 0; j < state.transitions.length; j++)
-        {
-            totalTransitionWeight += state.transitions[j].weight;
-        }
-
-        const transitionWeightBucket : number = rand.integer({ min: 1, max: totalTransitionWeight});
-        log("totalTransitionWeight = " + totalTransitionWeight + ", transitionWeightBucket = " + transitionWeightBucket);
-        let chosenTransition : number = 0;
-        let weight : number = state.transitions[chosenTransition].weight;
-        while (weight < transitionWeightBucket)
-        {
-            chosenTransition++;
-            weight += state.transitions[chosenTransition].weight;
-        }
-
-        log("picking transition " + chosenTransition + " from state " + state.name);
-
-        if (chosenTransition >= state.transitions.length)
-        {
-            throw "invalid transition! " + chosenTransition;
-        }
-
-        const transition : Transition = state.transitions[chosenTransition];
+        const transition : Transition = rand.weighted(state.transitions, state.transitions.map(function(elem) : number { return elem.weight; }));
         text += transition.text;
         state = transition.nextState;
     }
