@@ -499,9 +499,15 @@ function Round(roundNum : number, seed : number) : void
     const rand : Chance.Chance = new Chance(seed);
 
     let MIN_CHARS : number = 2;
-    let MAX_CHARS : number = 140;
+    let MAX_CHARS : number = 30;
     let MIN_WORD_LENGTH : number = 1;
     let MAX_WORD_LENGTH : number = 10;
+
+    if (rand.bool({likelihood: 20}))
+    {
+        log("long mode");
+        MAX_CHARS = 130
+    }
 
     if (g_testingMode)
     {
