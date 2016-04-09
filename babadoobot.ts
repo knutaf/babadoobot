@@ -45,6 +45,16 @@ class BState {
     {
         this.transitions = [];
     }
+
+    private static getTransitionWeight(t : Transition) : number
+    {
+        return t.weight;
+    }
+
+    public transitionWeights() : number[]
+    {
+        return this.transitions.map(BState.getTransitionWeight);
+    }
 }
 
 class Transition {
@@ -167,7 +177,7 @@ function GenerateWord(rand : Chance.Chance, wordLength : number) : string
             }
         }
 
-        const transition : Transition = rand.weighted(state.transitions, state.transitions.map(function(elem) : number { return elem.weight; }));
+        const transition : Transition = rand.weighted(state.transitions, state.transitionWeights());
         text += transition.text;
         state = transition.nextState;
     }
