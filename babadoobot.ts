@@ -277,6 +277,18 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
     let modifiedWords : boolean[] = [];
     for (let i : number = 0; i < words.length; i++)
     {
+        function RandomAppend(textChoices : string[], boolLikelihood : number = 50) : void
+        {
+            if (rand.bool({likelihood : boolLikelihood}))
+            {
+                words[i] += RandomArrayElement(textChoices, rand);
+            }
+            else
+            {
+                modifiedWords[i] = false;
+            }
+        }
+
         let word : string = words[i];
         modifiedWords[i] = true;
         switch (words[i])
@@ -284,147 +296,70 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
             case "adobada":
             case "adobo":
             {
-                if (rand.bool())
-                {
-                    words[i] += RandomArrayElement(DELICIOUS_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
+                RandomAppend(DELICIOUS_TEXT);
                 break;
             }
 
             case "baa":
             case "baabaa":
             {
-                if (rand.bool())
-                {
-                    words[i] += RandomArrayElement(SHEEP_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
+                RandomAppend(SHEEP_TEXT);
                 break;
             }
 
             case "babadoo":
             case "babadoobo":
             {
-                if (rand.bool())
-                {
-                    words[i] += RandomArrayElement(ME_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
+                RandomAppend(ME_TEXT);
                 break;
             }
 
             case "bad":
             {
-                if (rand.bool({likelihood: 20}))
-                {
-                    words[i] += RandomArrayElement(BAD_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
+                RandomAppend(BAD_TEXT, 20);
                 break;
             }
 
             case "bada":
             {
-                if (rand.bool({likelihood: 20}))
-                {
-                    words[i] += RandomArrayElement(BADA_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
+                RandomAppend(BADA_TEXT, 20);
                 break;
             }
 
             case "boba":
             {
-                if (rand.bool())
-                {
-                    words[i] += RandomArrayElement(BOBA_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
+                RandomAppend(BOBA_TEXT);
                 break;
             }
 
             case "boo":
             {
-                if (rand.bool())
-                {
-                    words[i] += RandomArrayElement(BOO_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
+                RandomAppend(BOO_TEXT);
                 break;
             }
 
             case "booboo":
             {
-                if (rand.bool())
-                {
-                    words[i] += RandomArrayElement(HURT_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
+                RandomAppend(HURT_TEXT);
                 break;
             }
 
             case "dad":
             case "dada":
             {
-                if (rand.bool())
-                {
-                    words[i] += RandomArrayElement(DAD_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
+                RandomAppend(DAD_TEXT);
                 break;
             }
 
             case "dodo":
             {
-                if (rand.bool())
-                {
-                    words[i] += RandomArrayElement(DODO_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
+                RandomAppend(DODO_TEXT);
                 break;
             }
 
             case "dood":
             {
-                if (rand.bool())
-                {
-                    words[i] += RandomArrayElement(DOOD_TEXT, rand);
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
+                RandomAppend(DOOD_TEXT);
                 break;
             }
 
