@@ -7,7 +7,7 @@ import path = require("path");
 let g_log : fs.WriteStream = null;
 let g_testingMode : boolean = false;
 
-function log(text : string, ...args: any[])
+function log(text : string, ...args: any[]) : void
 {
     let message = text;
     if (args != null)
@@ -23,17 +23,17 @@ function log(text : string, ...args: any[])
     }
 }
 
-function FilterNonNull(elem : any)
+function FilterNonNull(elem : any) : boolean
 {
     return (elem != null);
 }
 
-function RandomArrayIndex(arr : any[], rand : Chance.Chance)
+function RandomArrayIndex(arr : any[], rand : Chance.Chance) : number
 {
     return rand.integer({min: 0, max: arr.length-1});
 }
 
-function RandomArrayElement(arr : any[], rand : Chance.Chance)
+function RandomArrayElement<T>(arr : T[], rand : Chance.Chance) : T
 {
     return arr[RandomArrayIndex(arr, rand)];
 }
@@ -122,7 +122,7 @@ StatePenultimateB.transitions.push(new Transition("o", StateO, 100));
 StatePenultimateD.transitions.push(new Transition("a", StateA, 100));
 StatePenultimateD.transitions.push(new Transition("o", StateO, 100));
 
-function GenerateWord(rand : Chance.Chance, wordLength : number)
+function GenerateWord(rand : Chance.Chance, wordLength : number) : string
 {
     log("GenerateWord(" + wordLength + ")");
 
@@ -273,7 +273,7 @@ const BADA_TEXT : string[] =
     "bing"
 ];
 
-function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : number)
+function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : number) : string[]
 {
     let modifiedWords : boolean[] = [];
     for (let i : number = 0; i < words.length; i++)
@@ -462,9 +462,9 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
     return words;
 }
 
-function Main(args : string[])
+function Main(args : string[]) : void
 {
-    function ReSeed()
+    function ReSeed() : number
     {
         return Math.round(Math.random() * 1000000000);
     }
@@ -500,16 +500,16 @@ function Main(args : string[])
 
     StartRound(seed);
 
-    setInterval(function() {
+    setInterval(function() : void {
         seed = ReSeed();
         StartRound(seed);
     }, roundInterval);
 }
 
-function StartRound(seed : number)
+function StartRound(seed : number) : void
 {
     let scriptDir : string = path.dirname(global.process.argv[1]);
-    fs.readdir(scriptDir, function(err : Error, files : string[])
+    fs.readdir(scriptDir, function(err : Error, files : string[]) : void
     {
         if (!err)
         {
@@ -540,7 +540,7 @@ function StartRound(seed : number)
     });
 }
 
-function Round(roundNum : number, seed : number)
+function Round(roundNum : number, seed : number) : void
 {
     if (g_log != null)
     {
