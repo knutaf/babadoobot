@@ -320,6 +320,13 @@ const DOOD_TEXT : string[] =
     , " (*)>"
 ];
 
+const BOOB_TEXT : string[] =
+[
+    " (oh my!)"
+    , " (. Y .)"
+    , " (.Y.)"
+];
+
 function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : number) : string[]
 {
     let modifiedWords : boolean[] = [];
@@ -383,6 +390,12 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
             case "boo":
             {
                 RandomAppend(BOO_TEXT);
+                break;
+            }
+
+            case "boob":
+            {
+                RandomAppend(BOOB_TEXT);
                 break;
             }
 
