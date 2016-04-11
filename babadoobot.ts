@@ -450,7 +450,7 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
     return words;
 }
 
-function StartRound(seed : number) : void
+function StartRound(seed : number, delayBeforeRoundStartInMilliseconds : number) : void
 {
     let scriptDir : string = path.dirname(global.process.argv[1]);
     fs.readdir(scriptDir, function(err : Error, files : string[]) : void
@@ -458,6 +458,7 @@ function StartRound(seed : number) : void
         if (!err)
         {
             let lastRound : number = 0;
+            let lastRoundIndex : number = -1;
             for (let i : number = 0; i < files.length; i++)
             {
                 let matches : string[] = files[i].match(/^round_(\d+)\.log$/);
@@ -470,12 +471,62 @@ function StartRound(seed : number) : void
                     if (roundNum > lastRound)
                     {
                         lastRound = roundNum;
+                        lastRoundIndex = i;
                         log("last seen round is " + lastRound);
                     }
                 }
             }
 
-            Round(lastRound + 1, seed);
+            function StartWithDelay() : void
+            {
+                if (delayBeforeRoundStartInMilliseconds > 0)
+                {
+                    log("delaying for " + delayBeforeRoundStartInMilliseconds + " before starting next round");
+                }
+
+                setTimeout(function()
+                {
+                    if (delayBeforeRoundStartInMilliseconds > 0)
+                    {
+                        log("delay is done. starting round");
+                    }
+
+                    Round(lastRound + 1, seed);
+                }, delayBeforeRoundStartInMilliseconds);
+            }
+
+            if (delayBeforeRoundStartInMilliseconds == 0 && lastRoundIndex != -1)
+            {
+                let lastRoundLogPath : string = path.join(scriptDir, files[lastRoundIndex]);
+                fs.stat(lastRoundLogPath, function(err, stats)
+                {
+                    if (!err)
+                    {
+                        let lastRoundStartTime : number = stats.ctime.valueOf();
+                        let nextRoundStartTime : number = lastRoundStartTime + g_roundIntervalInMilliseconds;
+                        let nowTime : number = (new Date()).valueOf();
+                        if (nextRoundStartTime > nowTime)
+                        {
+                            delayBeforeRoundStartInMilliseconds = nextRoundStartTime - nowTime;
+                            log("delay for " + delayBeforeRoundStartInMilliseconds);
+                        }
+                        else
+                        {
+                            log("past start time for next round, so starting now");
+                        }
+
+                        StartWithDelay();
+                    }
+                    else
+                    {
+                        log("error getting stats of " + lastRoundLogPath + "! " + err);
+                    }
+                });
+            }
+            else
+            {
+                StartWithDelay();
+            }
         }
         else
         {
@@ -548,11 +599,7 @@ function Round(roundNum : number, seed : number) : void
 
     function NextRound() : void
     {
-        log("Waiting " + g_roundIntervalInMilliseconds + " ms until next round");
-        setTimeout(function() : void
-        {
-            StartRound(GetNewSeed());
-        }, g_roundIntervalInMilliseconds);
+        StartRound(GetNewSeed(), g_roundIntervalInMilliseconds);
     }
 
     if (g_isLive)
@@ -603,10 +650,10 @@ function Main(args : string[]) : void
 
     if (!g_isLive)
     {
-        g_roundIntervalInMilliseconds = 5 * 1000;
+        g_roundIntervalInMilliseconds = 10 * 1000;
     }
 
-    StartRound(seed);
+    StartRound(seed, 0);
 }
 
 Main(global.process.argv);
