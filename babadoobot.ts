@@ -40,7 +40,7 @@ function logf(format : string, ...args: any[]) : void
     }
 }
 
-function GetNewSeed() : number
+function GenerateNewSeed() : number
 {
     return Math.round(Math.random() * 1000000000);
 }
@@ -62,19 +62,26 @@ function RandomArrayElement<T>(arr : T[], rand : Chance.Chance) : T
 
 function Tweet(text : string, andThen : (() => void)) : void
 {
-    g_twitterClient.post('statuses/update', {status: text}, function(err : Error, tweet : any, response : any)
+    if (g_isLive)
     {
-        log("err: " + JSON.stringify(err, null, 4));
-        log("tweeted: " + JSON.stringify(tweet, null, 4));  // Tweet body.
-        log("response: " + JSON.stringify(response, null, 4));  // Raw response object.
-        if (response != null && response.body != null)
+        g_twitterClient.post('statuses/update', {status: text}, function(err : Error, tweet : any, response : any)
         {
-            let responseBody : any = JSON.parse(response.body);
-            log("response.body: " + JSON.stringify(responseBody, null, 4));  // Raw response object.
-        }
+            log("err: " + JSON.stringify(err, null, 4));
+            log("tweeted: " + JSON.stringify(tweet, null, 4));  // Tweet body.
+            log("response: " + JSON.stringify(response, null, 4));  // Raw response object.
+            if (response != null && response.body != null)
+            {
+                let responseBody : any = JSON.parse(response.body);
+                log("response.body: " + JSON.stringify(responseBody, null, 4));
+            }
 
+            andThen();
+        });
+    }
+    else
+    {
         andThen();
-    });
+    }
 }
 
 class BState
@@ -452,6 +459,8 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
 
 function StartRound(seed : number, delayBeforeRoundStartInMilliseconds : number) : void
 {
+    // Find the last round that was done, so we can number the next round. This
+    // matters for restarting the bot after process exit.
     let scriptDir : string = path.dirname(global.process.argv[1]);
     fs.readdir(scriptDir, function(err : Error, files : string[]) : void
     {
@@ -477,6 +486,7 @@ function StartRound(seed : number, delayBeforeRoundStartInMilliseconds : number)
                 }
             }
 
+            // Helper function to start the next round after a delay
             function StartWithDelay() : void
             {
                 if (delayBeforeRoundStartInMilliseconds > 0)
@@ -495,6 +505,12 @@ function StartRound(seed : number, delayBeforeRoundStartInMilliseconds : number)
                 }, delayBeforeRoundStartInMilliseconds);
             }
 
+            // Look at the creation time of the last round's log file to figure
+            // out when it happened. Start our round g_roundIntervalInMilliseconds
+            // after the last round, to make sure we don't tweet too often.
+            //
+            // If we were already supplied a delay or this is the first round
+            // ever, then we don't need to look this up from the last log file.
             if (delayBeforeRoundStartInMilliseconds == 0 && lastRoundIndex != -1)
             {
                 let lastRoundLogPath : string = path.join(scriptDir, files[lastRoundIndex]);
@@ -502,13 +518,14 @@ function StartRound(seed : number, delayBeforeRoundStartInMilliseconds : number)
                 {
                     if (!err)
                     {
+                        // for some reason birthtime isn't correct, but ctime
+                        // is.
                         let lastRoundStartTime : number = stats.ctime.valueOf();
                         let nextRoundStartTime : number = lastRoundStartTime + g_roundIntervalInMilliseconds;
                         let nowTime : number = (new Date()).valueOf();
                         if (nextRoundStartTime > nowTime)
                         {
                             delayBeforeRoundStartInMilliseconds = nextRoundStartTime - nowTime;
-                            log("delay for " + delayBeforeRoundStartInMilliseconds);
                         }
                         else
                         {
@@ -557,8 +574,9 @@ function Round(roundNum : number, seed : number) : void
 
     if (rand.bool({likelihood: 20}))
     {
-        log("long mode");
-        MAX_CHARS = 130
+        log("long tweet mode for this round");
+        MIN_CHARS = 30;
+        MAX_CHARS = 130;
     }
 
     const numChars : number = rand.integer({min: MIN_CHARS, max: MAX_CHARS});
@@ -599,22 +617,15 @@ function Round(roundNum : number, seed : number) : void
 
     function NextRound() : void
     {
-        StartRound(GetNewSeed(), g_roundIntervalInMilliseconds);
+        StartRound(GenerateNewSeed(), g_roundIntervalInMilliseconds);
     }
 
-    if (g_isLive)
-    {
-        Tweet(text, NextRound);
-    }
-    else
-    {
-        NextRound();
-    }
+    Tweet(text, NextRound);
 }
 
 function Main(args : string[]) : void
 {
-    let seed : number = GetNewSeed();
+    let seed : number = GenerateNewSeed();
 
     for (let iArg : number = 2; iArg < args.length; iArg++)
     {
