@@ -3,24 +3,45 @@ import Chance = require("chance");
 import fs = require("fs");
 import sprintf_js = require("sprintf-js");
 import path = require("path");
+let Twitter : any = require("twitter");
 
 let g_log : fs.WriteStream = null;
 let g_testingMode : boolean = false;
+let g_roundIntervalInMilliseconds : number = 5 * 1000;
 
-function log(text : string, ...args: any[]) : void
+let g_twitterClient : any = new Twitter(
 {
-    let message = text;
-    if (args != null)
-    {
-        message = sprintf_js.vsprintf(text, args);
-    }
+    consumer_key: process.env["TWITTER_CONSUMER_KEY"],
+    consumer_secret: process.env["TWITTER_CONSUMER_SECRET"],
+    access_token_key: process.env["TWITTER_ACCESS_TOKEN_KEY"],
+    access_token_secret: process.env["TWITTER_ACCESS_TOKEN_SECRET"],
+});
 
-    console.log(message);
+function log(text : string) : void
+{
+    console.log(text);
 
     if (g_log != null)
     {
-        g_log.write(message + "\r\n");
+        g_log.write(text + "\r\n");
     }
+}
+
+function logf(format : string, ...args: any[]) : void
+{
+    let text : string = sprintf_js.vsprintf(format, args);
+
+    console.log(text);
+
+    if (g_log != null)
+    {
+        g_log.write(text + "\r\n");
+    }
+}
+
+function GetNewSeed() : number
+{
+    return Math.round(Math.random() * 1000000000);
 }
 
 function FilterNonNull(elem : any) : boolean
@@ -36,6 +57,23 @@ function RandomArrayIndex(arr : any[], rand : Chance.Chance) : number
 function RandomArrayElement<T>(arr : T[], rand : Chance.Chance) : T
 {
     return arr[RandomArrayIndex(arr, rand)];
+}
+
+function Tweet(text : string, andThen : (() => void)) : void
+{
+    g_twitterClient.post('statuses/update', {status: text}, function(err : Error, tweet : any, response : any)
+    {
+        log("err: " + JSON.stringify(err, null, 4));
+        log("tweeted: " + JSON.stringify(tweet, null, 4));  // Tweet body.
+        log("response: " + JSON.stringify(response, null, 4));  // Raw response object.
+        if (response != null && response.body != null)
+        {
+            let responseBody : any = JSON.parse(response.body);
+            log("response.body: " + JSON.stringify(responseBody, null, 4));  // Raw response object.
+        }
+
+        andThen();
+    });
 }
 
 class BState {
@@ -411,13 +449,7 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
 
 function Main(args : string[]) : void
 {
-    function ReSeed() : number
-    {
-        return Math.round(Math.random() * 1000000000);
-    }
-
-    let roundInterval = 5 * 1000;
-    let seed : number = ReSeed();
+    let seed : number = GetNewSeed();
 
     for (let iArg : number = 2; iArg < args.length; iArg++)
     {
@@ -446,11 +478,6 @@ function Main(args : string[]) : void
     }
 
     StartRound(seed);
-
-    setInterval(function() : void {
-        seed = ReSeed();
-        StartRound(seed);
-    }, roundInterval);
 }
 
 function StartRound(seed : number) : void
@@ -489,6 +516,10 @@ function StartRound(seed : number) : void
 
 function Round(roundNum : number, seed : number) : void
 {
+    log("");
+    log("");
+    logf("--------------- Round %04u --------------", roundNum);
+
     if (g_log != null)
     {
         g_log.end();
@@ -555,9 +586,19 @@ function Round(roundNum : number, seed : number) : void
 
     words = ProcessWords(rand, words, 140);
 
-    const text : string = words.join(" ");
     log("Seeded with " + seed);
-    log("#%04u (len=%u): %s", roundNum, text.length, text);
+
+    const text : string = sprintf_js.sprintf("#%04u: %s", roundNum, words.join(" "));
+    logf("(len=%u) %s", text.length, text);
+
+    Tweet(text, function() : void
+    {
+        log("Waiting " + g_roundIntervalInMilliseconds + " ms until next round");
+        setTimeout(function() : void
+        {
+            StartRound(GetNewSeed());
+        }, g_roundIntervalInMilliseconds);
+    });
 }
 
 Main(global.process.argv);
