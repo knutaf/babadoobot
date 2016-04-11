@@ -6,8 +6,9 @@ import path = require("path");
 let Twitter : any = require("twitter");
 
 let g_log : fs.WriteStream = null;
+let g_isLive : boolean = false;
 let g_testingMode : boolean = false;
-let g_roundIntervalInMilliseconds : number = 5 * 1000;
+let g_roundIntervalInMilliseconds : number = 12 * 60 * 60 * 1000; // 12 hours
 
 let g_twitterClient : any = new Twitter(
 {
@@ -76,7 +77,8 @@ function Tweet(text : string, andThen : (() => void)) : void
     });
 }
 
-class BState {
+class BState
+{
     transitions : Transition[];
 
     constructor(public name : string)
@@ -95,7 +97,8 @@ class BState {
     }
 }
 
-class Transition {
+class Transition
+{
     constructor(public text : string, public nextState : BState, public weight : number)
     {
     }
@@ -447,39 +450,6 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
     return words;
 }
 
-function Main(args : string[]) : void
-{
-    let seed : number = GetNewSeed();
-
-    for (let iArg : number = 2; iArg < args.length; iArg++)
-    {
-        switch (args[iArg])
-        {
-            case "-seed":
-            {
-                iArg++;
-                if (iArg < args.length)
-                {
-                    seed = parseInt(args[iArg]);
-                }
-                else
-                {
-                    throw "arg -seed needs argument!";
-                }
-                break;
-            }
-
-            case "-test":
-            {
-                g_testingMode = true;
-                break;
-            }
-        }
-    }
-
-    StartRound(seed);
-}
-
 function StartRound(seed : number) : void
 {
     let scriptDir : string = path.dirname(global.process.argv[1]);
@@ -540,21 +510,6 @@ function Round(roundNum : number, seed : number) : void
         MAX_CHARS = 130
     }
 
-    if (g_testingMode)
-    {
-        /*
-        MIN_CHARS = 10;
-        MAX_CHARS = 10;
-        MIN_WORD_LENGTH = 10;
-        MAX_WORD_LENGTH = 10;
-        */
-
-        MIN_CHARS = 80;
-        MAX_CHARS = 90;
-        MIN_WORD_LENGTH = 1;
-        MAX_WORD_LENGTH = 4;
-    }
-
     const numChars : number = rand.integer({min: MIN_CHARS, max: MAX_CHARS});
     log("Minimum " + numChars + " chars");
 
@@ -591,14 +546,67 @@ function Round(roundNum : number, seed : number) : void
     const text : string = sprintf_js.sprintf("#%04u: %s", roundNum, words.join(" "));
     logf("(len=%u) %s", text.length, text);
 
-    Tweet(text, function() : void
+    function NextRound() : void
     {
         log("Waiting " + g_roundIntervalInMilliseconds + " ms until next round");
         setTimeout(function() : void
         {
             StartRound(GetNewSeed());
         }, g_roundIntervalInMilliseconds);
-    });
+    }
+
+    if (g_isLive)
+    {
+        Tweet(text, NextRound);
+    }
+    else
+    {
+        NextRound();
+    }
+}
+
+function Main(args : string[]) : void
+{
+    let seed : number = GetNewSeed();
+
+    for (let iArg : number = 2; iArg < args.length; iArg++)
+    {
+        switch (args[iArg])
+        {
+            case "-seed":
+            {
+                iArg++;
+                if (iArg < args.length)
+                {
+                    seed = parseInt(args[iArg]);
+                }
+                else
+                {
+                    throw "arg -seed needs argument!";
+                }
+                break;
+            }
+
+            case "-test":
+            {
+                g_testingMode = true;
+                break;
+            }
+
+            case "-live":
+            {
+                g_isLive = true;
+                break;
+            }
+        }
+    }
+
+    if (!g_isLive)
+    {
+        g_roundIntervalInMilliseconds = 5 * 1000;
+    }
+
+    StartRound(seed);
 }
 
 Main(global.process.argv);
