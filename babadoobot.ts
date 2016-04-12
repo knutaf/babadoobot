@@ -154,8 +154,8 @@ StateA.transitions.push(new Transition("b", StateB, 100));
 StateA.transitions.push(new Transition("a", StateAA, 25));
 StateA.transitions.push(new Transition("d", StateD, 100));
 
-StateAA.transitions.push(new Transition("b", StateB, 100));
-StateAA.transitions.push(new Transition("d", StateD, 100));
+StateAA.transitions.push(new Transition("b", StateSingleB, 100));
+StateAA.transitions.push(new Transition("d", StateSingleD, 100));
 
 StateSingleD.transitions.push(new Transition("a", StateA, 100));
 StateSingleD.transitions.push(new Transition("o", StateO, 100));
