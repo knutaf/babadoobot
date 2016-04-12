@@ -169,7 +169,7 @@ StateDD.transitions.push(new Transition("o", StateO, 100));
 
 StateO.transitions.push(new Transition("b", StateB, 100));
 StateO.transitions.push(new Transition("d", StateD, 100));
-StateO.transitions.push(new Transition("o", StateOO, 70));
+StateO.transitions.push(new Transition("o", StateOO, 50));
 
 StateOO.transitions.push(new Transition("b", StateSingleB, 100));
 StateOO.transitions.push(new Transition("d", StateSingleD, 100));
