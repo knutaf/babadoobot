@@ -8,7 +8,7 @@ let Twitter : any = require("twitter");
 let g_log : fs.WriteStream = null;
 let g_isLive : boolean = false;
 let g_testingMode : boolean = false;
-let g_roundIntervalInMilliseconds : number = parseInt(process.env["BABADOOBOT_ROUND_INTERVAL_HOURS"] || 6)  * 60 * 60 * 1000; // 12 hours
+let g_roundIntervalInMilliseconds : number = parseInt(process.env["BABADOOBOT_ROUND_INTERVAL_HOURS"] || "6")  * 60 * 60 * 1000; // 12 hours
 
 let g_twitterClient : any = new Twitter(
 {
