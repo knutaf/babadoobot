@@ -327,6 +327,15 @@ const BOOB_TEXT : string[] =
     , " (.Y.)"
 ];
 
+const OBA_TEXT : string[] =
+[
+    "femi"
+    , "femi martins"
+    , " (@/ObafemiMartins, that is)"
+    , "flip"
+    , "flippy martins"
+];
+
 function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : number) : string[]
 {
     let modifiedWords : boolean[] = [];
@@ -421,6 +430,12 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
             case "dood":
             {
                 RandomAppend(DOOD_TEXT);
+                break;
+            }
+
+            case "oba":
+            {
+                RandomAppend(OBA_TEXT);
                 break;
             }
 
@@ -612,7 +627,7 @@ function Round(roundNum : number, seed : number) : void
     {
         if (words.length > 5)
         {
-           words[2] = "baa";
+           words[2] = "oba";
            words[5] = "obobobo";
         }
     }
