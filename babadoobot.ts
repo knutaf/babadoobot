@@ -486,15 +486,11 @@ function StartRound(seed : number, delayBeforeRoundStartInMilliseconds : number)
                 let matches : string[] = files[i].match(/^round_(\d+)\.log$/);
                 if (matches != null)
                 {
-                    log("found matching file " + files[i]);
-
                     let roundNum : number = parseInt(matches[1]);
-                    log("found round number " + roundNum);
                     if (roundNum > lastRound)
                     {
                         lastRound = roundNum;
                         lastRoundIndex = i;
-                        log("last seen round is " + lastRound);
                     }
                 }
             }
