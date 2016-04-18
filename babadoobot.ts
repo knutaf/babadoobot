@@ -60,6 +60,22 @@ function RandomArrayElement<T>(arr : T[], rand : Chance.Chance) : T
     return arr[RandomArrayIndex(arr, rand)];
 }
 
+function CreateWordAppender(appended : string) : ((x : string) => string)
+{
+    return function(word : string) : string
+    {
+        return word + appended;
+    };
+}
+
+function CreateWordReplacer(replacement : string) : ((x : string) => string)
+{
+    return function(word : string) : string
+    {
+        return replacement;
+    };
+}
+
 function Tweet(text : string, andThen : (() => void)) : void
 {
     if (g_isLive)
@@ -233,107 +249,114 @@ function GenerateWord(rand : Chance.Chance, wordLength : number) : string
     return text;
 }
 
-const ME_TEXT : string[] =
+const ME_TEXT : ((x : string) => string)[] =
 [
-    " (that's me!)"
-    ," (who, me?)"
-    ," (hi!)"
-    ," (it's me!)"
-    ," (yooo)"
-    ," B)"
+    CreateWordReplacer("@babadoobot")
+    , CreateWordAppender(" (that's me!)")
+    , CreateWordAppender(" (who, me?)")
+    , CreateWordAppender(" (hi!)")
+    , CreateWordAppender(" (it's me!)")
+    , CreateWordAppender(" (yooo)")
+    , CreateWordAppender(" B)")
 ];
 
-const SHEEP_TEXT : string[] =
+const SHEEP_TEXT : ((x : string) => string)[] =
 [
-    " (a sheep!)"
-    ," (suddenly, a sheep!)"
-    ," (turned into a sheep)"
+    CreateWordAppender(" (a sheep!)")
+    , CreateWordAppender(" (suddenly, a sheep!)")
+    , CreateWordAppender(" (turned into a sheep)")
 ];
 
-const DELICIOUS_TEXT : string[] =
+const DELICIOUS_TEXT : ((x : string) => string)[] =
 [
-    " (mmm)"
-    ," (delicious!)"
-    ," (so good)"
-    ," (i'm hungry)"
-    ," (nom nom)"
+    CreateWordAppender(" (mmm)")
+    , CreateWordAppender(" (delicious!)")
+    , CreateWordAppender(" (so good)")
+    , CreateWordAppender(" (i'm hungry)")
+    , CreateWordAppender(" (nom nom)")
 ];
 
-const BOO_TEXT : string[] =
+const BOO_TEXT : ((x : string) => string)[] =
 [
-    "!"
-    ," (a ghost!)"
-    ," (spooky)"
-    ,"hoo"
+    CreateWordAppender("!")
+    , CreateWordAppender(" (a ghost!)")
+    , CreateWordAppender(" (spooky)")
+    , CreateWordAppender("hoo")
 ];
 
-const HURT_TEXT : string[] =
+const HURT_TEXT : ((x : string) => string)[] =
 [
-    " (you ok?)"
-    ," (medic!)"
-    ," (need a doctor)"
-    ," (it hooths)"
+    CreateWordAppender(" (you ok?)")
+    , CreateWordAppender(" (medic!)")
+    , CreateWordAppender(" (need a doctor)")
+    , CreateWordAppender(" (it hooths)")
 ];
 
-const BOBA_TEXT : string[] =
+const BOBA_TEXT : ((x : string) => string)[] =
 [
-    " (as in fett)"
-    ," (tea)"
-    ," (fett, of course)"
-    ," (nice jetpack)"
+    CreateWordAppender(" (as in fett)")
+    , CreateWordAppender(" (tea)")
+    , CreateWordAppender(" (fett, of course)")
+    , CreateWordAppender(" (nice jetpack)")
 ];
 
-const DAD_TEXT : string[] =
+const DAD_TEXT : ((x : string) => string)[] =
 [
-    " (yes, son?)"
-    ," (praise the son)"
-    ," (bless you, my child)"
+    CreateWordAppender(" (yes, son?)")
+    , CreateWordAppender(" (praise the son)")
+    , CreateWordAppender(" (bless you, my child)")
 ];
 
-const DODO_TEXT : string[] =
+const DODO_TEXT : ((x : string) => string)[] =
 [
-    " (extinct)"
-    ," (poor bird)"
-    ," (the bird, long gone)"
+    CreateWordAppender(" (extinct)")
+    , CreateWordAppender(" (poor bird)")
+    , CreateWordAppender(" (the bird, long gone)")
 ];
 
-const BAD_TEXT : string[] =
+const BAD_TEXT : ((x : string) => string)[] =
 [
-    "dger"
-    ,"minton"
+    CreateWordAppender("dger")
+    , CreateWordAppender("minton")
 ];
 
-const BADA_TEXT : string[] =
+const BADA_TEXT : ((x : string) => string)[] =
 [
-    "bing"
+    CreateWordAppender("bing")
 ];
 
-const DOOD_TEXT : string[] =
+const DOOD_TEXT : ((x : string) => string)[] =
 [
-    "!"
-    , " *squawk*"
-    , " <(\")"
-    , " <(^)"
-    , " (\")>"
-    , " (^)>"
-    , " <(*)"
-    , " (*)>"
+    CreateWordAppender("!")
+    , CreateWordAppender(" *squawk*")
+    , CreateWordAppender(" <(\")")
+    , CreateWordAppender(" <(^)")
+    , CreateWordAppender(" (\")>")
+    , CreateWordAppender(" (^)>")
+    , CreateWordAppender(" <(*)")
+    , CreateWordAppender(" (*)>")
 ];
 
-const BOOB_TEXT : string[] =
+const BOOB_TEXT : ((x : string) => string)[] =
 [
-    " (oh my!)"
-    , " (. Y .)"
-    , " (.Y.)"
+    CreateWordAppender(" (oh my!)")
+    , CreateWordAppender(" (. Y .)")
+    , CreateWordAppender(" (.Y.)")
 ];
 
-const OBA_TEXT : string[] =
+const OBA_TEXT : ((x : string) => string)[] =
 [
-    "femi"
-    , "femi martins"
-    , " (@/ObafemiMartins, that is)"
-    , "flip"
-    , "flippy martins"
+    CreateWordAppender("femi")
+    , CreateWordAppender("femi martins")
+    , CreateWordAppender(" (@/ObafemiMartins, that is)")
+    , CreateWordAppender("flip")
+    , CreateWordAppender("flippy martins")
+];
+
+const OBOBOBO_TEXT : ((x : string) => string)[] =
+[
+    CreateWordReplacer("@/OboboboTheNinja")
+    , CreateWordAppender(" (the ninja)")
 ];
 
 function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : number) : string[]
@@ -341,11 +364,11 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
     let modifiedWords : boolean[] = [];
     for (let i : number = 0; i < words.length; i++)
     {
-        function RandomAppend(textChoices : string[], boolLikelihood : number = 50) : void
+        function InvokeRandomWordModifier(modifierChoices : ((x : string) => string)[], boolLikelihood : number = 50) : void
         {
             if (rand.bool({likelihood : boolLikelihood}))
             {
-                words[i] += RandomArrayElement(textChoices, rand);
+                words[i] = RandomArrayElement(modifierChoices, rand)(words[i]);
             }
             else
             {
@@ -360,95 +383,88 @@ function ProcessWords(rand : Chance.Chance, words : string[], maxNumChars : numb
             case "adobada":
             case "adobo":
             {
-                RandomAppend(DELICIOUS_TEXT);
+                InvokeRandomWordModifier(DELICIOUS_TEXT);
                 break;
             }
 
             case "baa":
             case "baabaa":
             {
-                RandomAppend(SHEEP_TEXT);
+                InvokeRandomWordModifier(SHEEP_TEXT);
                 break;
             }
 
             case "babadoo":
             case "babadoobo":
             {
-                RandomAppend(ME_TEXT);
+                InvokeRandomWordModifier(ME_TEXT);
                 break;
             }
 
             case "bad":
             {
-                RandomAppend(BAD_TEXT, 20);
+                InvokeRandomWordModifier(BAD_TEXT, 20);
                 break;
             }
 
             case "bada":
             {
-                RandomAppend(BADA_TEXT, 20);
+                InvokeRandomWordModifier(BADA_TEXT, 20);
                 break;
             }
 
             case "boba":
             {
-                RandomAppend(BOBA_TEXT);
+                InvokeRandomWordModifier(BOBA_TEXT);
                 break;
             }
 
             case "boo":
             {
-                RandomAppend(BOO_TEXT);
+                InvokeRandomWordModifier(BOO_TEXT);
                 break;
             }
 
             case "boob":
             {
-                RandomAppend(BOOB_TEXT);
+                InvokeRandomWordModifier(BOOB_TEXT);
                 break;
             }
 
             case "booboo":
             {
-                RandomAppend(HURT_TEXT);
+                InvokeRandomWordModifier(HURT_TEXT);
                 break;
             }
 
             case "dad":
             case "dada":
             {
-                RandomAppend(DAD_TEXT);
+                InvokeRandomWordModifier(DAD_TEXT);
                 break;
             }
 
             case "dodo":
             {
-                RandomAppend(DODO_TEXT);
+                InvokeRandomWordModifier(DODO_TEXT);
                 break;
             }
 
             case "dood":
             {
-                RandomAppend(DOOD_TEXT);
+                InvokeRandomWordModifier(DOOD_TEXT);
                 break;
             }
 
             case "oba":
             {
-                RandomAppend(OBA_TEXT);
+                InvokeRandomWordModifier(OBA_TEXT);
                 break;
             }
 
             case "obobobo":
             {
-                if (rand.bool())
-                {
-                    words[i] = "@/OboboboTheNinja";
-                }
-                else
-                {
-                    modifiedWords[i] = false;
-                }
+                InvokeRandomWordModifier(OBOBOBO_TEXT);
                 break;
             }
 
@@ -688,7 +704,14 @@ function Main(args : string[]) : void
         g_roundIntervalInMilliseconds = 10 * 1000;
     }
 
-    StartRound(seed, 0);
+    if (!g_testingMode)
+    {
+        StartRound(seed, 0);
+    }
+    else
+    {
+        StartRound(seed, 1);
+    }
 }
 
 Main(global.process.argv);
