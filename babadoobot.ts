@@ -23,7 +23,7 @@ let MIN_GENERATED_CHARS : number;
 let MAX_GENERATED_CHARS : number;
 let MIN_WORD_LENGTH : number;
 let MAX_WORD_LENGTH : number;
-let MAX_SENTENCE_LENGTH : number;
+let WORD_COUNT_BETWEEN_PUNCTUATION : number;
 
 function log(text : string) : void
 {
@@ -373,18 +373,14 @@ const OBOBOBO_TEXT : ((x : string) => string)[] =
     , CreateWordAppender(" (the ninja)")
 ];
 
-const SENTENCE_ENDS : string[] =
+const PUNCTUATION_TEXT : string[] =
 [
     "."
     , "?"
     , "!"
     , ";"
     , "..."
-];
-
-const PUNCTUATION_TEXT : string[] =
-[
-    ","
+    , ","
 ];
 
 function ProcessWords(rand : Chance.Chance, words : string[]) : string[]
@@ -533,49 +529,34 @@ function AddPunctutation(rand : Chance.Chance, words : string[]) : string[]
 {
     let totalLength : number = words.join(" ").length;
 
-    let maxNumSentences : number = Math.ceil(words.length / MAX_SENTENCE_LENGTH);
-    let numSentences : number = rand.integer({min : 0, max: maxNumSentences});
-    log("generating " + numSentences + " sentences. max-rand=" + maxNumSentences);
+    let maxNumPunctuation : number = Math.ceil(words.length / WORD_COUNT_BETWEEN_PUNCTUATION);
+    let numPunctuations : number = rand.integer({min : 0, max: maxNumPunctuation});
+    log("generating " + numPunctuations + " punctuations. max-rand=" + maxNumPunctuation);
 
     let punctuations : TextAfterWord[] = [];
 
-    // If we have any sentences, at least end the tweet with punctuation
-    if (numSentences > 0)
+    // If we have any punctuation, at least end the tweet with a sentence end
+    if (numPunctuations > 0)
     {
-        punctuations.push(new TextAfterWord(RandomArrayElement(SENTENCE_ENDS, rand), words.length - 1));
-    }
-
-    for (let i : number = 0; i < numSentences - 1; i++)
-    {
-        // generate unique sentence ends
-        let sentenceEndIndex = RandomArrayIndex(words, rand);
-        while (sentenceEndIndices.indexOf(sentenceEndIndex) != -1)
+        let finalPunctuation : string = RandomArrayElement(PUNCTUATION_TEXT, rand);
+        while (finalPunctuation == "," ||
+               finalPunctuation == ";")
         {
-            sentenceEndIndex = RandomArrayIndex(words, rand);
+            finalPunctuation = RandomArrayElement(PUNCTUATION_TEXT, rand);
         }
 
-        let sentenceEndText = RandomArrayElement(SENTENCE_ENDS, rand);
-        while (sentenceEndText + totalLength > MAX_ALLOWED_CHARS)
-        {
-            sentenceEndText = RandomArrayElement(SENTENCE_ENDS, rand);
-        }
-
-        punctuations.push(new TextAfterWord(sentenceEndText, sentenceEndIndex));
-        totalLength += sentenceEndText.length;
+        punctuations.push(new TextAfterWord(finalPunctuation, words.length - 1));
     }
 
-    let maxNumPunctuationChars : number = Math.min(MAX_ALLOWED_CHARS - totalLength, words.length);
-    log("max punctuation chars: " + maxNumPunctuationChars);
-
-    let numPuncutationChars : number = rand.integer({min: 0, max: maxNumPunctuationChars});
-    for (let i : number = 0; i < numPuncutationChars; i++)
+    for (let i : number = 0; i < numPunctuations - 1; i++)
     {
         // generate unique puncuation locations
+        let punctuationIndex : number;
         let bFoundPunctuation : boolean = true;
         while (bFoundPunctuation)
         {
             bFoundPunctuation = false;
-            let punctuationIndex = RandomArrayIndex(words, rand);
+            punctuationIndex = RandomArrayIndex(words, rand);
             for (let tafIndex : number = 0; !bFoundPunctuation && tafIndex < punctuations.length; tafIndex++)
             {
                 if (punctuations[tafIndex].wordIndex == punctuationIndex)
@@ -585,14 +566,22 @@ function AddPunctutation(rand : Chance.Chance, words : string[]) : string[]
             }
         }
 
-        let punctuationText = RandomArrayElement(SENTENCE_ENDS, rand);
-        while (punctuationText + totalLength > MAX_ALLOWED_CHARS)
+        let punctuationText = RandomArrayElement(PUNCTUATION_TEXT, rand);
+        while (punctuationText.length + totalLength > MAX_ALLOWED_CHARS)
         {
-            punctuationText = RandomArrayElement(SENTENCE_ENDS, rand);
+            punctuationText = RandomArrayElement(PUNCTUATION_TEXT, rand);
         }
 
-        punctuationIndices.push(punctuationIndex);
+        punctuations.push(new TextAfterWord(punctuationText, punctuationIndex));
+        totalLength += punctuationText.length;
     }
+
+    for (let tafIndex : number = 0; tafIndex < punctuations.length; tafIndex++)
+    {
+        words[punctuations[tafIndex].wordIndex] += punctuations[tafIndex].text;
+    }
+
+    return words;
 }
 
 function StartRound(seed : number, delayBeforeRoundStartInMilliseconds : number) : void
@@ -705,14 +694,13 @@ function Round(roundNum : number, seed : number) : void
     MAX_GENERATED_CHARS = 50;
     MIN_WORD_LENGTH = 1;
     MAX_WORD_LENGTH = 10;
-    MAX_SENTENCE_LENGTH = 3;
+    WORD_COUNT_BETWEEN_PUNCTUATION = 3;
 
     if (rand.bool({likelihood: 20}))
     {
         log("long tweet mode for this round");
         MIN_GENERATED_CHARS = 30;
         MAX_GENERATED_CHARS = 125;
-        MAX_SENTENCE_LENGTH = 5;
     }
 
     const numChars : number = rand.integer({min: MIN_GENERATED_CHARS, max: MAX_GENERATED_CHARS});
@@ -735,6 +723,7 @@ function Round(roundNum : number, seed : number) : void
         words.push(GenerateWord(rand, wordLengths[i]));
     }
 
+    /*
     if (g_testingMode)
     {
         if (words.length > 5)
@@ -743,6 +732,7 @@ function Round(roundNum : number, seed : number) : void
            words[5] = "obobobo";
         }
     }
+    */
 
     words = ProcessWords(rand, words);
     words = AddPunctutation(rand, words);
