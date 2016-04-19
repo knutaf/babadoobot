@@ -648,7 +648,7 @@ function Round(roundNum : number, seed : number) : void
         }
     }
 
-    words = ProcessWords(rand, words, 140);
+    words = ProcessWords(rand, words, 140 - "#0000: ".length);
 
     log("Seeded with " + seed);
 
