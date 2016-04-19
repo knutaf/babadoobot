@@ -650,7 +650,7 @@ function Round(roundNum : number, seed : number) : void
         }
     }
 
-    words = ProcessWords(rand, words, 140);
+    words = ProcessWords(rand, words, 140 - "#0000: ".length);
 
     let maxNumSentences : number = Math.ceil(words.length / MAX_SENTENCE_LENGTH);
     let numSentences : number = rand.integer({min : 0, max: maxNumSentences});
