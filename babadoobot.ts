@@ -330,7 +330,7 @@ const DODO_TEXT : ((x : string) => string)[] =
 
 const BAD_TEXT : ((x : string) => string)[] =
 [
-    CreateWordAppender("dger")
+    CreateWordAppender("ger")
     , CreateWordAppender("minton")
 ];
 
