@@ -529,7 +529,7 @@ function AddPunctutation(rand : Chance.Chance, words : string[]) : string[]
 {
     let totalLength : number = words.join(" ").length;
 
-    let maxNumPunctuation : number = Math.ceil(words.length / WORD_COUNT_BETWEEN_PUNCTUATION);
+    let maxNumPunctuation : number = Math.ceil(words.length / WORD_COUNT_BETWEEN_PUNCTUATION) + 1;
     let numPunctuations : number = rand.integer({min : 0, max: maxNumPunctuation});
     log("generating " + numPunctuations + " punctuations. max-rand=" + maxNumPunctuation);
 
