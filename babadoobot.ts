@@ -608,15 +608,17 @@ function Round(roundNum : number, seed : number) : void
     const rand : Chance.Chance = new Chance(seed);
 
     let MIN_CHARS : number = 2;
-    let MAX_CHARS : number = 30;
+    let MAX_CHARS : number = 50;
     let MIN_WORD_LENGTH : number = 1;
     let MAX_WORD_LENGTH : number = 10;
+    let MAX_SENTENCE_LENGTH : number = 5;
 
     if (rand.bool({likelihood: 20}))
     {
         log("long tweet mode for this round");
         MIN_CHARS = 30;
-        MAX_CHARS = 130;
+        MAX_CHARS = 125;
+        MAX_SENTENCE_LENGTH = 10;
     }
 
     const numChars : number = rand.integer({min: MIN_CHARS, max: MAX_CHARS});
@@ -649,6 +651,39 @@ function Round(roundNum : number, seed : number) : void
     }
 
     words = ProcessWords(rand, words, 140);
+
+    let numSentences : number = rand.integer({min : 0, max: Math.ceil(words.length / MAX_SENTENCE_LENGTH)});
+    log("generating " + numSentences + " sentences");
+
+    let sentenceEndIndices : number[] = [];
+
+    // If we have any sentences, at least end the tweet with punctuation
+    if (numSentences > 0)
+    {
+        sentenceEndIndices.push(words.length - 1);
+    }
+
+    for (let i : number = 0; i < numSentences - 1; i++)
+    {
+        // generate unique sentence ends
+        let sentenceEndIndex = RandomArrayIndex(words, rand);
+        while (sentenceEndIndices.indexOf(sentenceEndIndex) != -1)
+        {
+            sentenceEndIndex = RandomArrayIndex(words, rand);
+        }
+
+        sentenceEndIndices.push(sentenceEndIndex);
+    }
+
+    for (let i : number = 0; i < sentenceEndIndices.length; i++)
+    {
+        if (sentenceEndIndices[i] >= words.length)
+        {
+            throw "generated out of bound sentence end index! " + sentenceEndIndices[i] + ", but only " + words.length + " words";
+        }
+
+        words[sentenceEndIndices[i]] += ".";
+    }
 
     log("Seeded with " + seed);
 
