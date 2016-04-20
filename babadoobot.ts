@@ -679,7 +679,7 @@ function Round(roundNum : number, seed : number) : void
 {
     log("");
     log("");
-    logf("--------------- Round %04u --------------", roundNum);
+    logf("--------------- Round %04u, seed %u --------------", roundNum, seed);
 
     if (g_log != null)
     {
