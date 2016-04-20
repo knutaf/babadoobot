@@ -696,7 +696,7 @@ function Round(roundNum : number, seed : number) : void
     MAX_WORD_LENGTH = 10;
     WORD_COUNT_BETWEEN_PUNCTUATION = 3;
 
-    if (rand.bool({likelihood: 20}))
+    if (rand.bool({likelihood: 35}))
     {
         log("long tweet mode for this round");
         MIN_GENERATED_CHARS = 30;
