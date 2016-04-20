@@ -539,7 +539,7 @@ function ProcessWords(words : GeneratedWord[], rand : Chance.Chance) : Generated
 function AddPunctutation(words : GeneratedWord[], rand : Chance.Chance) : GeneratedWord[]
 {
     // Add 1 to always allow a possible sentence end, even for short sentences
-    let maxNumPunctuation : number = Math.ceil(words.length / WORD_COUNT_BETWEEN_PUNCTUATION) + 1;
+    let maxNumPunctuation : number = Math.floor(words.length / WORD_COUNT_BETWEEN_PUNCTUATION) + 1;
 
     let numPunctuations : number = rand.integer({min : 0, max: maxNumPunctuation});
     log("generating " + numPunctuations + " punctuations. max-rand=" + maxNumPunctuation);
