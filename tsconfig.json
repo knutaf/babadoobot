@@ -7,6 +7,9 @@
   "compilerOptions": {
     "moduleResolution": "node",
     "module": "commonjs",
-    "noImplicitAny" : true
+    "noImplicitAny" : true,
+    "noImplicitReturns" : true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitUseStrict": true
   }
 }
