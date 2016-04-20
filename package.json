@@ -10,14 +10,14 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node babodabot.js",
-    "test": "node babodabot.js"
+    "start": "node babodabot.js"
   },
   "repository": {
     "type": "",
     "url": ""
   },
   "keywords": [
+    "gibberish",
     "twitter",
     "bot",
     "knutaf"
