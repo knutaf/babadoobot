@@ -134,6 +134,23 @@ class Transition
     }
 }
 
+class GeneratedWord
+{
+    constructor(public text : string, public modified : boolean)
+    {
+    }
+}
+
+function GetWordFromGeneratedWord(gw : GeneratedWord) : string
+{
+    return gw.text;
+}
+
+function JoinGeneratedWords(words : GeneratedWord[]) : string
+{
+    return words.map(GetWordFromGeneratedWord).join(" ");
+}
+
 class TextAfterWord
 {
     constructor(public text : string, public wordIndex : number)
@@ -210,7 +227,7 @@ StatePenultimateB.transitions.push(new Transition("o", StateO, 100));
 StatePenultimateD.transitions.push(new Transition("a", StateA, 100));
 StatePenultimateD.transitions.push(new Transition("o", StateO, 100));
 
-function GenerateWord(rand : Chance.Chance, wordLength : number) : string
+function GenerateWord(rand : Chance.Chance, wordLength : number) : GeneratedWord
 {
     log("GenerateWord(" + wordLength + ")");
 
@@ -260,7 +277,7 @@ function GenerateWord(rand : Chance.Chance, wordLength : number) : string
         state = transition.nextState;
     }
 
-    return text;
+    return new GeneratedWord(text, false);
 }
 
 const ME_TEXT : ((x : string) => string)[] =
@@ -383,26 +400,47 @@ const PUNCTUATION_TEXT : string[] =
     , ","
 ];
 
-function ProcessWords(rand : Chance.Chance, words : string[]) : string[]
+function TrimGeneratedWordsToSize(words : GeneratedWord[], lengthLimit : number, rand : Chance.Chance) : GeneratedWord[]
 {
-    let modifiedWords : boolean[] = [];
+    let allWords : string = JoinGeneratedWords(words);
+    log("TrimGeneratedWordsToSize length " + allWords.length + " to " + lengthLimit);
+    while (allWords.length > lengthLimit)
+    {
+        log("words [" + allWords + "] is too long, " + allWords.length + " vs " + lengthLimit);
+
+        let indexToDelete : number = RandomArrayIndex(words, rand);
+        while (words[indexToDelete].modified)
+        {
+            indexToDelete = RandomArrayIndex(words, rand);
+        }
+
+        log("deleting word " + indexToDelete + " -- " + words[indexToDelete].text);
+
+        words[indexToDelete] = null;
+        words = words.filter(FilterNonNull);
+        allWords = JoinGeneratedWords(words);
+    }
+
+    return words;
+}
+
+function ProcessWords(words : GeneratedWord[], rand : Chance.Chance) : GeneratedWord[]
+{
     for (let i : number = 0; i < words.length; i++)
     {
         function InvokeRandomWordModifier(modifierChoices : ((x : string) => string)[], boolLikelihood : number = 50) : void
         {
             if (rand.bool({likelihood : boolLikelihood}))
             {
-                words[i] = RandomArrayElement(modifierChoices, rand)(words[i]);
-            }
-            else
-            {
-                modifiedWords[i] = false;
+                let originalWord : string = words[i].text;
+                words[i].text = RandomArrayElement(modifierChoices, rand)(originalWord);
+                words[i].modified = true;
+                log("modified " + originalWord + " (" + i + "): " + words[i].text);
             }
         }
 
-        let word : string = words[i];
-        modifiedWords[i] = true;
-        switch (words[i])
+        let word : string = words[i].text;
+        switch (words[i].text)
         {
             case "adobada":
             case "adobo":
@@ -491,49 +529,59 @@ function ProcessWords(rand : Chance.Chance, words : string[]) : string[]
                 InvokeRandomWordModifier(OBOBOBO_TEXT);
                 break;
             }
-
-            default:
-            {
-                modifiedWords[i] = false;
-            }
-        }
-
-        if (modifiedWords[i])
-        {
-            log("modified " + word + " (" + i + "): " + words[i]);
         }
     }
 
-    let allWords : string = words.join(" ");
-    while (allWords.length > MAX_ALLOWED_CHARS)
-    {
-        log("words [" + allWords + "] is too long, " + allWords.length + " vs " + MAX_ALLOWED_CHARS);
-
-        let indexToDelete : number = RandomArrayIndex(words, rand);
-        while (modifiedWords[indexToDelete])
-        {
-            indexToDelete = RandomArrayIndex(words, rand);
-        }
-
-        log("deleting word " + indexToDelete + " -- " + words[indexToDelete]);
-
-        words[indexToDelete] = null;
-        words = words.filter(FilterNonNull);
-        allWords = words.join(" ");
-    }
-
+    words = TrimGeneratedWordsToSize(words, MAX_ALLOWED_CHARS, rand);
     return words;
 }
 
-function AddPunctutation(rand : Chance.Chance, words : string[]) : string[]
+function AddPunctutation(words : GeneratedWord[], rand : Chance.Chance) : GeneratedWord[]
 {
-    let totalLength : number = words.join(" ").length;
-
+    // Add 1 to always allow a possible sentence end, even for short sentences
     let maxNumPunctuation : number = Math.ceil(words.length / WORD_COUNT_BETWEEN_PUNCTUATION) + 1;
+
     let numPunctuations : number = rand.integer({min : 0, max: maxNumPunctuation});
     log("generating " + numPunctuations + " punctuations. max-rand=" + maxNumPunctuation);
 
     let punctuations : TextAfterWord[] = [];
+
+    // reserve 1 char for the final punctuation
+    let lengthLimit : number = MAX_ALLOWED_CHARS - 1;
+
+    for (let i : number = 0; i < numPunctuations - 1; i++)
+    {
+        let punctuationText = RandomArrayElement(PUNCTUATION_TEXT, rand);
+
+        // make sure there's enough room for punctuation text
+        words = TrimGeneratedWordsToSize(words, lengthLimit - punctuationText.length, rand);
+
+        punctuations.push(new TextAfterWord(punctuationText, null));
+        lengthLimit -= punctuationText.length;
+    }
+
+    for (let i : number = 0; i < numPunctuations - 1; i++)
+    {
+        // generate unique puncuation locations, and also remember that the
+        // last word will have one after it
+        let punctuationIndex : number;
+        let bFoundPunctuation : boolean = true;
+        while (bFoundPunctuation)
+        {
+            bFoundPunctuation = false;
+            punctuationIndex = RandomArrayIndex(words, rand);
+            for (let tafIndex : number = 0; !bFoundPunctuation && tafIndex < punctuations.length; tafIndex++)
+            {
+                if (punctuations[tafIndex].wordIndex == punctuationIndex ||
+                    punctuationIndex == words.length - 1)
+                {
+                    bFoundPunctuation = true;
+                }
+            }
+        }
+
+        punctuations[i].wordIndex = punctuationIndex;
+    }
 
     // If we have any punctuation, at least end the tweet with a sentence end
     if (numPunctuations > 0)
@@ -548,37 +596,15 @@ function AddPunctutation(rand : Chance.Chance, words : string[]) : string[]
         punctuations.push(new TextAfterWord(finalPunctuation, words.length - 1));
     }
 
-    for (let i : number = 0; i < numPunctuations - 1; i++)
-    {
-        // generate unique puncuation locations
-        let punctuationIndex : number;
-        let bFoundPunctuation : boolean = true;
-        while (bFoundPunctuation)
-        {
-            bFoundPunctuation = false;
-            punctuationIndex = RandomArrayIndex(words, rand);
-            for (let tafIndex : number = 0; !bFoundPunctuation && tafIndex < punctuations.length; tafIndex++)
-            {
-                if (punctuations[tafIndex].wordIndex == punctuationIndex)
-                {
-                    bFoundPunctuation = true;
-                }
-            }
-        }
-
-        let punctuationText = RandomArrayElement(PUNCTUATION_TEXT, rand);
-        while (punctuationText.length + totalLength > MAX_ALLOWED_CHARS)
-        {
-            punctuationText = RandomArrayElement(PUNCTUATION_TEXT, rand);
-        }
-
-        punctuations.push(new TextAfterWord(punctuationText, punctuationIndex));
-        totalLength += punctuationText.length;
-    }
-
     for (let tafIndex : number = 0; tafIndex < punctuations.length; tafIndex++)
     {
-        words[punctuations[tafIndex].wordIndex] += punctuations[tafIndex].text;
+        words[punctuations[tafIndex].wordIndex].text += punctuations[tafIndex].text;
+    }
+
+    let totalLength : number = JoinGeneratedWords(words).length;
+    if (totalLength > MAX_ALLOWED_CHARS)
+    {
+        throw "generated too long text! " + totalLength + " vs " + MAX_ALLOWED_CHARS;
     }
 
     return words;
@@ -717,7 +743,7 @@ function Round(roundNum : number, seed : number) : void
 
     log("Generating " + wordLengths.length + " words, total " + totalLength + " chars");
 
-    let words : string[] = [];
+    let words : GeneratedWord[] = [];
     for (let i : number = 0; i < wordLengths.length; i++)
     {
         words.push(GenerateWord(rand, wordLengths[i]));
@@ -728,18 +754,18 @@ function Round(roundNum : number, seed : number) : void
     {
         if (words.length > 5)
         {
-           words[2] = "oba";
-           words[5] = "obobobo";
+           words[2].text = "oba";
+           words[5].text = "obobobo";
         }
     }
     */
 
-    words = ProcessWords(rand, words);
-    words = AddPunctutation(rand, words);
+    words = ProcessWords(words, rand);
+    words = AddPunctutation(words, rand);
 
-    log("Seeded with " + seed);
+    log("(reminder) Seeded with " + seed);
 
-    const text : string = sprintf_js.sprintf("#%04u: %s", roundNum, words.join(" "));
+    const text : string = sprintf_js.sprintf("#%04u: %s", roundNum, JoinGeneratedWords(words));
     logf("(len=%u) %s", text.length, text);
 
     function NextRound() : void
