@@ -570,9 +570,9 @@ function AddPunctutation(words : GeneratedWord[], rand : Chance.Chance) : Genera
         {
             bFoundPunctuation = false;
             punctuationIndex = RandomArrayIndex(words, rand);
-            for (let tafIndex : number = 0; !bFoundPunctuation && tafIndex < punctuations.length; tafIndex++)
+            for (let tawIndex : number = 0; !bFoundPunctuation && tawIndex < punctuations.length; tawIndex++)
             {
-                if (punctuations[tafIndex].wordIndex == punctuationIndex ||
+                if (punctuations[tawIndex].wordIndex == punctuationIndex ||
                     punctuationIndex == words.length - 1)
                 {
                     bFoundPunctuation = true;
@@ -596,9 +596,9 @@ function AddPunctutation(words : GeneratedWord[], rand : Chance.Chance) : Genera
         punctuations.push(new TextAfterWord(finalPunctuation, words.length - 1));
     }
 
-    for (let tafIndex : number = 0; tafIndex < punctuations.length; tafIndex++)
+    for (let tawIndex : number = 0; tawIndex < punctuations.length; tawIndex++)
     {
-        words[punctuations[tafIndex].wordIndex].text += punctuations[tafIndex].text;
+        words[punctuations[tawIndex].wordIndex].text += punctuations[tawIndex].text;
     }
 
     let totalLength : number = JoinGeneratedWords(words).length;
