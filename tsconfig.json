@@ -1,7 +1,5 @@
  {
   "exclude": [
-    "typings/browser.d.ts",
-    "typings/browser",
     "node_modules"
   ],
   "compilerOptions": {
@@ -10,6 +8,7 @@
     "noImplicitAny" : true,
     "noImplicitReturns" : true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitUseStrict": true
+    "noImplicitUseStrict": true,
+    "target": "es6"
   }
 }
