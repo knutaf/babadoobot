@@ -552,17 +552,17 @@ function AddPunctutation(words : GeneratedWord[], rand : Chance.Chance) : Genera
     for (let i : number = 0; i < numPunctuations - 1; i++)
     {
         let punctuationText = RandomArrayElement(PUNCTUATION_TEXT, rand);
+        lengthLimit -= punctuationText.length;
 
         // make sure there's enough room for punctuation text
-        words = TrimGeneratedWordsToSize(words, lengthLimit - punctuationText.length, rand);
+        words = TrimGeneratedWordsToSize(words, lengthLimit, rand);
 
         punctuations.push(new TextAfterWord(punctuationText, null));
-        lengthLimit -= punctuationText.length;
     }
 
     for (let i : number = 0; i < numPunctuations - 1; i++)
     {
-        // generate unique puncuation locations, and also remember that the
+        // generate unique punctuation locations, and also remember that the
         // last word will have one after it
         let punctuationIndex : number;
         let bFoundPunctuation : boolean = true;
@@ -703,77 +703,88 @@ function StartRound(seed : number, delayBeforeRoundStartInMilliseconds : number)
 
 function Round(roundNum : number, seed : number) : void
 {
-    log("");
-    log("");
-    logf("--------------- Round %04u, seed %u --------------", roundNum, seed);
-
-    if (g_log != null)
+    try
     {
-        g_log.end();
-    }
+        log("");
+        log("");
+        logf("--------------- Round %04u, seed %u --------------", roundNum, seed);
 
-    g_log = fs.createWriteStream(sprintf_js.sprintf("round_%04u.log", roundNum));
-
-    const rand : Chance.Chance = new Chance(seed);
-
-    MIN_GENERATED_CHARS = 2;
-    MAX_GENERATED_CHARS = 50;
-    MIN_WORD_LENGTH = 1;
-    MAX_WORD_LENGTH = 10;
-    WORD_COUNT_BETWEEN_PUNCTUATION = 3;
-
-    if (rand.bool({likelihood: 30}))
-    {
-        log("long tweet mode for this round");
-        MIN_GENERATED_CHARS = 30;
-        MAX_GENERATED_CHARS = 125;
-    }
-
-    const numChars : number = rand.integer({min: MIN_GENERATED_CHARS, max: MAX_GENERATED_CHARS});
-    log("Minimum " + numChars + " chars");
-
-    let totalLength : number = 0;
-    let wordLengths : number[] = [];
-    while (totalLength < numChars)
-    {
-        const wordLength : number = rand.integer({min: MIN_WORD_LENGTH, max: MAX_WORD_LENGTH});
-        totalLength += wordLength;
-        wordLengths.push(wordLength);
-    }
-
-    log("Generating " + wordLengths.length + " words, total " + totalLength + " chars");
-
-    let words : GeneratedWord[] = [];
-    for (let i : number = 0; i < wordLengths.length; i++)
-    {
-        words.push(GenerateWord(rand, wordLengths[i]));
-    }
-
-    /*
-    if (g_testingMode)
-    {
-        if (words.length > 5)
+        if (g_log != null)
         {
-           words[2].text = "oba";
-           words[5].text = "obobobo";
+            g_log.end();
+        }
+
+        g_log = fs.createWriteStream(sprintf_js.sprintf("round_%04u.log", roundNum));
+
+        const rand : Chance.Chance = new Chance(seed);
+
+        MIN_GENERATED_CHARS = 2;
+        MAX_GENERATED_CHARS = 50;
+        MIN_WORD_LENGTH = 1;
+        MAX_WORD_LENGTH = 10;
+        WORD_COUNT_BETWEEN_PUNCTUATION = 3;
+
+        if (rand.bool({likelihood: 30}))
+        {
+            log("long tweet mode for this round");
+            MIN_GENERATED_CHARS = 30;
+            MAX_GENERATED_CHARS = 125;
+        }
+
+        const numChars : number = rand.integer({min: MIN_GENERATED_CHARS, max: MAX_GENERATED_CHARS});
+        log("Minimum " + numChars + " chars");
+
+        let totalLength : number = 0;
+        let wordLengths : number[] = [];
+        while (totalLength < numChars)
+        {
+            const wordLength : number = rand.integer({min: MIN_WORD_LENGTH, max: MAX_WORD_LENGTH});
+            totalLength += wordLength;
+            wordLengths.push(wordLength);
+        }
+
+        log("Generating " + wordLengths.length + " words, total " + totalLength + " chars");
+
+        let words : GeneratedWord[] = [];
+        for (let i : number = 0; i < wordLengths.length; i++)
+        {
+            words.push(GenerateWord(rand, wordLengths[i]));
+        }
+
+        /*
+        if (g_testingMode)
+        {
+            if (words.length > 5)
+            {
+               words[2].text = "oba";
+               words[5].text = "obobobo";
+            }
+        }
+        */
+
+        words = ProcessWords(words, rand);
+        words = AddPunctutation(words, rand);
+
+        log("(reminder) Seeded with " + seed);
+
+        const text : string = sprintf_js.sprintf("#%04u: %s", roundNum, JoinGeneratedWords(words));
+        logf("(len=%u) %s", text.length, text);
+
+        function NextRound() : void
+        {
+            StartRound(GenerateNewSeed(), g_roundIntervalInMilliseconds);
+        }
+
+        Tweet(text, NextRound);
+    }
+    catch (ex)
+    {
+        log("ex: " + ex);
+        if (g_log != null)
+        {
+            g_log.end();
         }
     }
-    */
-
-    words = ProcessWords(words, rand);
-    words = AddPunctutation(words, rand);
-
-    log("(reminder) Seeded with " + seed);
-
-    const text : string = sprintf_js.sprintf("#%04u: %s", roundNum, JoinGeneratedWords(words));
-    logf("(len=%u) %s", text.length, text);
-
-    function NextRound() : void
-    {
-        StartRound(GenerateNewSeed(), g_roundIntervalInMilliseconds);
-    }
-
-    Tweet(text, NextRound);
 }
 
 function Main(args : string[]) : void
