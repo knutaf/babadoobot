@@ -280,116 +280,6 @@ function GenerateWord(rand : Chance.Chance, wordLength : number) : GeneratedWord
     return new GeneratedWord(text, false);
 }
 
-const ME_TEXT : ((x : string) => string)[] =
-[
-    CreateWordReplacer("@babadoobot")
-    , CreateWordAppender(" (that's me!)")
-    , CreateWordAppender(" (who, me?)")
-    , CreateWordAppender(" (hi!)")
-    , CreateWordAppender(" (it's me!)")
-    , CreateWordAppender(" (yooo)")
-    , CreateWordAppender(" B)")
-];
-
-const SHEEP_TEXT : ((x : string) => string)[] =
-[
-    CreateWordAppender(" (a sheep!)")
-    , CreateWordAppender(" (suddenly, a sheep!)")
-    , CreateWordAppender(" (turned into a sheep)")
-];
-
-const DELICIOUS_TEXT : ((x : string) => string)[] =
-[
-    CreateWordAppender(" (mmm)")
-    , CreateWordAppender(" (delicious!)")
-    , CreateWordAppender(" (so good)")
-    , CreateWordAppender(" (i'm hungry)")
-    , CreateWordAppender(" (nom nom)")
-];
-
-const BOO_TEXT : ((x : string) => string)[] =
-[
-    CreateWordAppender("!")
-    , CreateWordAppender(" (a ghost!)")
-    , CreateWordAppender(" (spooky)")
-    , CreateWordAppender("hoo")
-];
-
-const HURT_TEXT : ((x : string) => string)[] =
-[
-    CreateWordAppender(" (you ok?)")
-    , CreateWordAppender(" (medic!)")
-    , CreateWordAppender(" (need a doctor)")
-    , CreateWordAppender(" (it hooths)")
-];
-
-const BOBA_TEXT : ((x : string) => string)[] =
-[
-    CreateWordAppender(" (as in fett)")
-    , CreateWordAppender(" (tea)")
-    , CreateWordAppender(" (fett, of course)")
-    , CreateWordAppender(" (nice jetpack)")
-];
-
-const DAD_TEXT : ((x : string) => string)[] =
-[
-    CreateWordAppender(" (yes, son?)")
-    , CreateWordAppender(" (praise the son)")
-    , CreateWordAppender(" (bless you, my child)")
-];
-
-const DODO_TEXT : ((x : string) => string)[] =
-[
-    CreateWordAppender(" (extinct)")
-    , CreateWordAppender(" (poor bird)")
-    , CreateWordAppender(" (the bird, long gone)")
-];
-
-const BAD_TEXT : ((x : string) => string)[] =
-[
-    CreateWordAppender("ger")
-    , CreateWordAppender("minton")
-];
-
-const BADA_TEXT : ((x : string) => string)[] =
-[
-    CreateWordAppender("bing")
-];
-
-const DOOD_TEXT : ((x : string) => string)[] =
-[
-    CreateWordAppender("!")
-    , CreateWordAppender(" *squawk*")
-    , CreateWordAppender(" <(\")")
-    , CreateWordAppender(" <(^)")
-    , CreateWordAppender(" (\")>")
-    , CreateWordAppender(" (^)>")
-    , CreateWordAppender(" <(*)")
-    , CreateWordAppender(" (*)>")
-];
-
-const BOOB_TEXT : ((x : string) => string)[] =
-[
-    CreateWordAppender(" (oh my!)")
-    , CreateWordAppender(" (. Y .)")
-    , CreateWordAppender(" (.Y.)")
-];
-
-const OBA_TEXT : ((x : string) => string)[] =
-[
-    CreateWordAppender("femi")
-    , CreateWordAppender("femi martins")
-    , CreateWordAppender(" (@/ObafemiMartins, that is)")
-    , CreateWordAppender("flip")
-    , CreateWordAppender("flippy martins")
-];
-
-const OBOBOBO_TEXT : ((x : string) => string)[] =
-[
-    CreateWordReplacer("@/OboboboTheNinja")
-    , CreateWordAppender(" (the ninja)")
-];
-
 const PUNCTUATION_TEXT : string[] =
 [
     "."
@@ -444,88 +334,170 @@ function ProcessWords(words : GeneratedWord[], rand : Chance.Chance) : Generated
             case "adobada":
             case "adobo":
             {
-                InvokeRandomWordModifier(DELICIOUS_TEXT);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender(" (mmm)")
+                        , CreateWordAppender(" (delicious!)")
+                        , CreateWordAppender(" (so good)")
+                        , CreateWordAppender(" (i'm hungry)")
+                        , CreateWordAppender(" (nom nom)")
+                    ]);
                 break;
             }
 
             case "baa":
             case "baabaa":
             {
-                InvokeRandomWordModifier(SHEEP_TEXT);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender(" (a sheep!)")
+                        , CreateWordAppender(" (suddenly, a sheep!)")
+                        , CreateWordAppender(" (turned into a sheep)")
+                    ]);
                 break;
             }
 
             case "babadoo":
             case "babadoobo":
             {
-                InvokeRandomWordModifier(ME_TEXT);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordReplacer("@babadoobot")
+                        , CreateWordAppender(" (that's me!)")
+                        , CreateWordAppender(" (who, me?)")
+                        , CreateWordAppender(" (hi!)")
+                        , CreateWordAppender(" (it's me!)")
+                        , CreateWordAppender(" (yooo)")
+                        , CreateWordAppender(" B)")
+                    ]);
                 break;
             }
 
             case "bad":
             {
-                InvokeRandomWordModifier(BAD_TEXT, 20);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender("ger")
+                        , CreateWordAppender("minton")
+                    ], 20);
                 break;
             }
 
             case "bada":
             {
-                InvokeRandomWordModifier(BADA_TEXT, 20);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender("bing")
+                    ], 20);
                 break;
             }
 
             case "boba":
             {
-                InvokeRandomWordModifier(BOBA_TEXT);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender(" (as in fett)")
+                        , CreateWordAppender(" (tea)")
+                        , CreateWordAppender(" (fett, of course)")
+                        , CreateWordAppender(" (nice jetpack)")
+                    ]);
                 break;
             }
 
             case "boo":
             {
-                InvokeRandomWordModifier(BOO_TEXT);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender("!")
+                        , CreateWordAppender(" (a ghost!)")
+                        , CreateWordAppender(" (spooky)")
+                        , CreateWordAppender("hoo")
+                    ]);
                 break;
             }
 
             case "boob":
             {
-                InvokeRandomWordModifier(BOOB_TEXT);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender(" (oh my!)")
+                        , CreateWordAppender(" (. Y .)")
+                        , CreateWordAppender(" (.Y.)")
+                    ]);
                 break;
             }
 
             case "booboo":
             {
-                InvokeRandomWordModifier(HURT_TEXT);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender(" (you ok?)")
+                        , CreateWordAppender(" (medic!)")
+                        , CreateWordAppender(" (need a doctor)")
+                        , CreateWordAppender(" (it hooths)")
+                    ]);
                 break;
             }
 
             case "dad":
             case "dada":
             {
-                InvokeRandomWordModifier(DAD_TEXT);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender(" (yes, son?)")
+                        , CreateWordAppender(" (praise the son)")
+                        , CreateWordAppender(" (bless you, my child)")
+                    ]);
                 break;
             }
 
             case "dodo":
             {
-                InvokeRandomWordModifier(DODO_TEXT);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender(" (extinct)")
+                        , CreateWordAppender(" (poor bird)")
+                        , CreateWordAppender(" (the bird, long gone)")
+                    ]);
                 break;
             }
 
             case "dood":
             {
-                InvokeRandomWordModifier(DOOD_TEXT);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender("!")
+                        , CreateWordAppender(" *squawk*")
+                        , CreateWordAppender(" <(\")")
+                        , CreateWordAppender(" <(^)")
+                        , CreateWordAppender(" (\")>")
+                        , CreateWordAppender(" (^)>")
+                        , CreateWordAppender(" <(*)")
+                        , CreateWordAppender(" (*)>")
+                    ]);
                 break;
             }
 
             case "oba":
             {
-                InvokeRandomWordModifier(OBA_TEXT);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender("femi")
+                        , CreateWordAppender("femi martins")
+                        , CreateWordAppender(" (@/ObafemiMartins, that is)")
+                        , CreateWordAppender("flip")
+                        , CreateWordAppender("flippy martins")
+                    ]);
                 break;
             }
 
             case "obobobo":
             {
-                InvokeRandomWordModifier(OBOBOBO_TEXT);
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordReplacer("@/OboboboTheNinja")
+                        , CreateWordAppender(" (the ninja)")
+                    ]);
                 break;
             }
         }
