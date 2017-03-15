@@ -9,6 +9,7 @@
     "noImplicitReturns" : true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitUseStrict": true,
+    "noUnusedLocals": true,
     "target": "es6"
   }
 }
