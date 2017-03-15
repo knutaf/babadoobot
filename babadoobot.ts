@@ -400,10 +400,10 @@ const PUNCTUATION_TEXT : string[] =
     , ","
 ];
 
-function TrimGeneratedWordsToSize(words : GeneratedWord[], lengthLimit : number, rand : Chance.Chance) : GeneratedWord[]
+function TrimGeneratedWordsToLength(words : GeneratedWord[], lengthLimit : number, rand : Chance.Chance) : GeneratedWord[]
 {
     let allWords : string = JoinGeneratedWords(words);
-    log("TrimGeneratedWordsToSize length " + allWords.length + " to " + lengthLimit);
+    log("TrimGeneratedWordsToLength length " + allWords.length + " to " + lengthLimit);
     while (allWords.length > lengthLimit)
     {
         log("words [" + allWords + "] is too long, " + allWords.length + " vs " + lengthLimit);
@@ -439,7 +439,6 @@ function ProcessWords(words : GeneratedWord[], rand : Chance.Chance) : Generated
             }
         }
 
-        let word : string = words[i].text;
         switch (words[i].text)
         {
             case "adobada":
@@ -532,7 +531,7 @@ function ProcessWords(words : GeneratedWord[], rand : Chance.Chance) : Generated
         }
     }
 
-    words = TrimGeneratedWordsToSize(words, MAX_ALLOWED_CHARS, rand);
+    words = TrimGeneratedWordsToLength(words, MAX_ALLOWED_CHARS, rand);
     return words;
 }
 
@@ -546,21 +545,36 @@ function AddPunctutation(words : GeneratedWord[], rand : Chance.Chance) : Genera
 
     let punctuations : TextAfterWord[] = [];
 
-    // reserve 1 char for the final punctuation
-    let lengthLimit : number = MAX_ALLOWED_CHARS - 1;
-
-    for (let i : number = 0; i < numPunctuations - 1; i++)
+    let lengthLimit : number = MAX_ALLOWED_CHARS;
+    let punctuationLength : number = 0;
+    for (let i : number = 0; i < numPunctuations; i++)
     {
-        let punctuationText = RandomArrayElement(PUNCTUATION_TEXT, rand);
-        lengthLimit -= punctuationText.length;
+        let punctuationText : string = RandomArrayElement(PUNCTUATION_TEXT, rand);
+
+        if (i == 0)
+        {
+            while (punctuationText == "," ||
+                   punctuationText == ";")
+            {
+                punctuationText = RandomArrayElement(PUNCTUATION_TEXT, rand);
+            }
+        }
+
+        punctuationLength += punctuationText.length;
+        log("punctuationLength: " + punctuationLength);
 
         // make sure there's enough room for punctuation text
-        words = TrimGeneratedWordsToSize(words, lengthLimit, rand);
+        words = TrimGeneratedWordsToLength(words, lengthLimit - punctuationLength, rand);
 
         punctuations.push(new TextAfterWord(punctuationText, null));
     }
 
-    for (let i : number = 0; i < numPunctuations - 1; i++)
+    if (punctuations.length > 0)
+    {
+        punctuations[0].wordIndex = words.length - 1;
+    }
+
+    for (let i : number = 1; i < punctuations.length; i++)
     {
         // generate unique punctuation locations, and also remember that the
         // last word will have one after it
@@ -572,8 +586,7 @@ function AddPunctutation(words : GeneratedWord[], rand : Chance.Chance) : Genera
             punctuationIndex = RandomArrayIndex(words, rand);
             for (let tawIndex : number = 0; !bFoundPunctuation && tawIndex < punctuations.length; tawIndex++)
             {
-                if (punctuations[tawIndex].wordIndex == punctuationIndex ||
-                    punctuationIndex == words.length - 1)
+                if (punctuations[tawIndex].wordIndex == punctuationIndex)
                 {
                     bFoundPunctuation = true;
                 }
@@ -581,19 +594,6 @@ function AddPunctutation(words : GeneratedWord[], rand : Chance.Chance) : Genera
         }
 
         punctuations[i].wordIndex = punctuationIndex;
-    }
-
-    // If we have any punctuation, at least end the tweet with a sentence end
-    if (numPunctuations > 0)
-    {
-        let finalPunctuation : string = RandomArrayElement(PUNCTUATION_TEXT, rand);
-        while (finalPunctuation == "," ||
-               finalPunctuation == ";")
-        {
-            finalPunctuation = RandomArrayElement(PUNCTUATION_TEXT, rand);
-        }
-
-        punctuations.push(new TextAfterWord(finalPunctuation, words.length - 1));
     }
 
     for (let tawIndex : number = 0; tawIndex < punctuations.length; tawIndex++)
@@ -779,7 +779,7 @@ function Round(roundNum : number, seed : number) : void
     }
     catch (ex)
     {
-        log("ex: " + ex);
+        log("ex: " + ex + ". " + ex.stack);
         if (g_log != null)
         {
             g_log.end();
