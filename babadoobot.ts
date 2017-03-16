@@ -21,9 +21,40 @@ let g_twitterClient : any = new Twitter(
 
 let MIN_GENERATED_CHARS : number;
 let MAX_GENERATED_CHARS : number;
-let MIN_WORD_LENGTH : number;
-let MAX_WORD_LENGTH : number;
-let WORD_COUNT_BETWEEN_PUNCTUATION : number;
+const MIN_WORD_LENGTH : number = 1;
+const MAX_WORD_LENGTH : number = 10;
+const WORD_COUNT_BETWEEN_PUNCTUATION : number = 3;
+
+let WORD_LENGTHS : number[] = [];
+let WORD_LENGTH_WEIGHTS : number[] = [];
+for (let wordLength : number = MIN_WORD_LENGTH; wordLength <= MAX_WORD_LENGTH; wordLength++)
+{
+    WORD_LENGTHS.push(wordLength);
+
+    let weight : number;
+    switch (wordLength)
+    {
+        case 1:
+        {
+            weight = 50;
+            break;
+        }
+
+        case 2:
+        {
+            weight = 75;
+            break;
+        }
+
+        default:
+        {
+            weight = 100;
+            break;
+        }
+    }
+
+    WORD_LENGTH_WEIGHTS.push(weight);
+}
 
 function log(text : string) : void
 {
@@ -141,19 +172,32 @@ class GeneratedWord
     }
 }
 
-function GetWordFromGeneratedWord(gw : GeneratedWord) : string
+class Punctuation
 {
-    return gw.text;
+    constructor(public text : string, public weight : number, public isOkAtEnd : boolean, public surrounds : boolean)
+    {
+    }
 }
 
 function JoinGeneratedWords(words : GeneratedWord[]) : string
 {
-    return words.map(GetWordFromGeneratedWord).join(" ");
+    let text : string = '';
+    for (let i : number = 0; i < words.length; i++)
+    {
+        let word : GeneratedWord = words[i];
+        text += word.text;
+        if (!/[-\/]$/.test(word.text))
+        {
+            text += ' ';
+        }
+    }
+
+    return text;
 }
 
-class TextAfterWord
+class PunctuationTargetingWord
 {
-    constructor(public text : string, public wordIndex : number)
+    constructor(public punctuation : Punctuation, public wordIndex : number)
     {
     }
 }
@@ -280,15 +324,23 @@ function GenerateWord(rand : Chance.Chance, wordLength : number) : GeneratedWord
     return new GeneratedWord(text, false);
 }
 
-const PUNCTUATION_TEXT : string[] =
+const PUNCTUATIONS : Punctuation[] =
 [
-    "."
-    , "?"
-    , "!"
-    , ";"
-    , "..."
-    , ","
+      new Punctuation(".",      100, true,   false)
+    , new Punctuation("?",      90,  true,   false)
+    , new Punctuation("!",      90,  true,   false)
+    , new Punctuation(";",      100, false,  false)
+    , new Punctuation("...",    100, true,   false)
+    , new Punctuation(",",      100, false,  false)
+    , new Punctuation("-",      40,  false,  false)
+    , new Punctuation("--",     50,  false,  false)
+    , new Punctuation("\"\"",   50,  false,  true)
+    , new Punctuation("~~",     20,  false,  true)
+    , new Punctuation("/",      40,  false,  false)
+    , new Punctuation(" &",     35,  false,  false)
 ];
+
+const PUNCTUATION_WEIGHTS : number[] = PUNCTUATIONS.map((p : Punctuation) => { return p.weight; });
 
 function TrimGeneratedWordsToLength(words : GeneratedWord[], lengthLimit : number, rand : Chance.Chance) : GeneratedWord[]
 {
@@ -515,30 +567,27 @@ function AddPunctutation(words : GeneratedWord[], rand : Chance.Chance) : Genera
     let numPunctuations : number = rand.integer({min : 0, max: maxNumPunctuation});
     log("generating " + numPunctuations + " punctuations. max-rand=" + maxNumPunctuation);
 
-    let punctuations : TextAfterWord[] = [];
+    let punctuations : PunctuationTargetingWord[] = [];
 
     let lengthLimit : number = MAX_ALLOWED_CHARS;
     let punctuationLength : number = 0;
     for (let i : number = 0; i < numPunctuations; i++)
     {
-        let punctuationText : string = RandomArrayElement(PUNCTUATION_TEXT, rand);
-
-        if (i == 0)
+        // Arbitrarily choose the first element to be the one that targets
+        // the last word.
+        let punctuation : Punctuation;
+        do
         {
-            while (punctuationText == "," ||
-                   punctuationText == ";")
-            {
-                punctuationText = RandomArrayElement(PUNCTUATION_TEXT, rand);
-            }
-        }
+            punctuation = rand.weighted(PUNCTUATIONS, PUNCTUATION_WEIGHTS);
+        } while (i == 0 && !punctuation.isOkAtEnd);
 
-        punctuationLength += punctuationText.length;
+        punctuationLength += punctuation.text.length;
         log("punctuationLength: " + punctuationLength);
 
         // make sure there's enough room for punctuation text
         words = TrimGeneratedWordsToLength(words, lengthLimit - punctuationLength, rand);
 
-        punctuations.push(new TextAfterWord(punctuationText, null));
+        punctuations.push(new PunctuationTargetingWord(punctuation, null));
     }
 
     if (punctuations.length > 0)
@@ -546,31 +595,39 @@ function AddPunctutation(words : GeneratedWord[], rand : Chance.Chance) : Genera
         punctuations[0].wordIndex = words.length - 1;
     }
 
+    // We've already filled in element 0 (the last word). Now generate random
+    // locations for the rest of the punctuation marks.
     for (let i : number = 1; i < punctuations.length; i++)
     {
-        // generate unique punctuation locations, and also remember that the
-        // last word will have one after it
-        let punctuationIndex : number;
+        let targetedWordIndex : number;
         let bFoundPunctuation : boolean = true;
         while (bFoundPunctuation)
         {
             bFoundPunctuation = false;
-            punctuationIndex = RandomArrayIndex(words, rand);
-            for (let tawIndex : number = 0; !bFoundPunctuation && tawIndex < punctuations.length; tawIndex++)
+            targetedWordIndex = RandomArrayIndex(words, rand);
+            for (let ptwIndex : number = 0; !bFoundPunctuation && ptwIndex < punctuations.length; ptwIndex++)
             {
-                if (punctuations[tawIndex].wordIndex == punctuationIndex)
+                if (punctuations[ptwIndex].wordIndex == targetedWordIndex)
                 {
                     bFoundPunctuation = true;
                 }
             }
         }
 
-        punctuations[i].wordIndex = punctuationIndex;
+        punctuations[i].wordIndex = targetedWordIndex;
     }
 
-    for (let tawIndex : number = 0; tawIndex < punctuations.length; tawIndex++)
+    for (let ptwIndex : number = 0; ptwIndex < punctuations.length; ptwIndex++)
     {
-        words[punctuations[tawIndex].wordIndex].text += punctuations[tawIndex].text;
+        let ptw : PunctuationTargetingWord = punctuations[ptwIndex];
+        if (ptw.punctuation.surrounds)
+        {
+            words[ptw.wordIndex].text = "" + ptw.punctuation.text[0] + words[ptw.wordIndex].text + ptw.punctuation.text[1];
+        }
+        else
+        {
+            words[ptw.wordIndex].text += ptw.punctuation.text;
+        }
     }
 
     let totalLength : number = JoinGeneratedWords(words).length;
@@ -692,9 +749,6 @@ function Round(roundNum : number, seed : number) : void
 
         MIN_GENERATED_CHARS = 2;
         MAX_GENERATED_CHARS = 50;
-        MIN_WORD_LENGTH = 1;
-        MAX_WORD_LENGTH = 10;
-        WORD_COUNT_BETWEEN_PUNCTUATION = 3;
 
         if (rand.bool({likelihood: 30}))
         {
@@ -710,7 +764,7 @@ function Round(roundNum : number, seed : number) : void
         let wordLengths : number[] = [];
         while (totalLength < numChars)
         {
-            const wordLength : number = rand.integer({min: MIN_WORD_LENGTH, max: MAX_WORD_LENGTH});
+            const wordLength : number = rand.weighted(WORD_LENGTHS, WORD_LENGTH_WEIGHTS);
             totalLength += wordLength;
             wordLengths.push(wordLength);
         }
