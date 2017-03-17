@@ -409,6 +409,16 @@ function ProcessWords(words : GeneratedWord[], rand : Chance.Chance) : Generated
                 break;
             }
 
+            case "bab":
+            {
+                InvokeRandomWordModifier(
+                    [
+                        CreateWordAppender(" (meaning, @sintecta)")
+                        , CreateWordAppender(" (@sintecta, of course)")
+                    ]);
+                break;
+            }
+
             case "babadoo":
             case "babadoobo":
             {
