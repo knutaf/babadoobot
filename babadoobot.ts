@@ -540,6 +540,16 @@ function ProcessWords(words : GeneratedWord[], rand : Chance.Chance) : Generated
                 break;
             }
 
+            case "doodoo":
+            {
+                InvokeRandomWordModifier(
+                    [
+                        // the poop emoji *sigh*
+                        CreateWordAppender(" \uD83D\uDCA9")
+                    ], 70);
+                break;
+            }
+
             case "oba":
             {
                 InvokeRandomWordModifier(
@@ -793,8 +803,7 @@ function Round(roundNum : number, seed : number) : void
         {
             if (words.length > 5)
             {
-               words[2].text = "oba";
-               words[5].text = "obobobo";
+               words[2].text = "doodoo";
             }
         }
         */
