@@ -679,7 +679,7 @@ function StartRound(seed : number, delayBeforeRoundStartInMilliseconds : number)
             {
                 if (delayBeforeRoundStartInMilliseconds > 0)
                 {
-                    log("delaying for " + delayBeforeRoundStartInMilliseconds + " before starting next round");
+                    log("delaying for " + delayBeforeRoundStartInMilliseconds + " ms before starting next round");
                 }
 
                 setTimeout(function()
@@ -744,9 +744,8 @@ function Round(roundNum : number, seed : number) : void
 {
     try
     {
-        log("");
-        log("");
-        logf("--------------- Round %04u, seed %u --------------", roundNum, seed);
+        console.log("");
+        console.log("");
 
         if (g_log != null)
         {
@@ -754,6 +753,8 @@ function Round(roundNum : number, seed : number) : void
         }
 
         g_log = fs.createWriteStream(sprintf_js.sprintf("round_%04u.log", roundNum));
+
+        logf("--------------- Round %04u, seed %u --------------", roundNum, seed);
 
         const rand : Chance.Chance = new Chance(seed);
 
