@@ -1,8 +1,8 @@
 {
-  "name": "Babodabot",
+  "name": "Babadoobot",
   "version": "1.0.0",
   "description": "A twitter bot that babodabobadabadoobabo",
-  "main": "babodabot.js",
+  "main": "babadoobot.js",
   "dependencies": {
     "twitter": "^1.2.5",
     "chance": "^1.0.1",
@@ -10,7 +10,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node babodabot.js"
+    "start": "node babadoobot.js"
   },
   "repository": {
     "type": "",
@@ -23,5 +23,5 @@
     "knutaf"
   ],
   "author": "knutaf",
-  "homepage": "http://barncover.blogspot.com/"
+  "homepage": "https://barncover.blogspot.com/2016/04/babbling-with-babadoobot.html"
 }
